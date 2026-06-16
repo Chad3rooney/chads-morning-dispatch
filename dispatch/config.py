@@ -35,6 +35,10 @@ SITE = {
     "max_news_per_category": 6,           # quality over quantity
     "news_lookback_hours": 30,            # ignore stories older than this
     "request_timeout": 12,                # seconds per network call
+    # Last-known-good market values live here. If a source is temporarily
+    # blocked (Yahoo throttles datacenter IPs hard), the briefing falls back to
+    # these, flagged "as of <time>", instead of showing "unavailable".
+    "market_cache_path": "data/market_cache.json",
 }
 
 # ---------------------------------------------------------------------------

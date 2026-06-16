@@ -62,16 +62,21 @@ def _quote_row(q):
             "</div>"
         ).format(label=esc(q.label))
     d = q.direction
+    label = esc(q.label)
+    if getattr(q, "stale", False):
+        label += '<span class="q-asof" title="Last available data — live source was unreachable this run">as of {}</span>'.format(
+            esc(q.as_of) if q.as_of else "earlier")
     return (
-        '<div class="row">'
+        '<div class="row{stale}">'
         '<span class="q-label">{label}</span>'
         '<span class="q-nums {dir}">'
         '<span class="q-price">{price}</span>'
         '<span class="q-chg">{arrow} {chg} <span class="q-pct">{pct}</span></span>'
         "</span></div>"
     ).format(
-        label=esc(q.label), dir=d, price=fmt_price(q),
+        label=label, dir=d, price=fmt_price(q),
         arrow=_ARROW[d], chg=esc(fmt_change(q)), pct=esc(fmt_pct(q)),
+        stale=" is-stale" if getattr(q, "stale", False) else "",
     )
 
 
@@ -177,15 +182,20 @@ def watchlist_section(quotes):
     rows = []
     for q in quotes:
         if q.ok:
+            name = esc(q.label)
+            if getattr(q, "stale", False):
+                name += '<span class="q-asof" title="Last available data">as of {}</span>'.format(
+                    esc(q.as_of) if q.as_of else "earlier")
             rows.append(
-                '<div class="wl-row {dir}">'
+                '<div class="wl-row {dir}{stale}">'
                 '<span class="wl-name">{label}</span>'
                 '<span class="wl-price">{price}</span>'
                 '<span class="wl-chg">{arrow} {chg}</span>'
                 '<span class="wl-pct">{pct}</span>'
                 "</div>".format(
-                    dir=q.direction, label=esc(q.label), price=fmt_price(q),
-                    arrow=_ARROW[q.direction], chg=esc(fmt_change(q)), pct=esc(fmt_pct(q)))
+                    dir=q.direction, label=name, price=fmt_price(q),
+                    arrow=_ARROW[q.direction], chg=esc(fmt_change(q)), pct=esc(fmt_pct(q)),
+                    stale=" is-stale" if getattr(q, "stale", False) else "")
             )
         else:
             rows.append(
@@ -352,6 +362,9 @@ a:hover{text-decoration:underline}
 .q-nums.up .q-price,.q-nums.down .q-price,.q-nums.flat .q-price{color:var(--ink)}
 .q-unavail,.wl-unavail{font-size:12px; color:var(--ink-faint); font-style:italic}
 .row.muted .q-label{color:var(--ink-faint)}
+.q-asof{display:block; font-size:10px; font-weight:500; color:var(--ink-faint);
+  letter-spacing:.02em; margin-top:1px}
+.is-stale .q-price,.is-stale .wl-price{opacity:.82}
 
 /* Themes */
 .mood{font-size:16.5px; color:var(--ink); margin:0 0 18px; font-weight:560;

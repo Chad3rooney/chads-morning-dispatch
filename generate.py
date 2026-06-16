@@ -46,17 +46,29 @@ def build(out_dir):
     print("Building %s for %s" % (cfg.SITE["title"], stamp))
 
     timeout = cfg.SITE.get("request_timeout", 12)
+    cache_path = cfg.SITE.get("market_cache_path", "data/market_cache.json")
+    market_cache = markets.load_cache(cache_path)
 
     print("- Markets: snapshot groups")
     market_groups = _safe(
         "markets", lambda: markets.fetch_market_groups(cfg.MARKET_GROUPS, timeout=timeout), [])
-    ok = sum(1 for g in market_groups for q in g["quotes"] if q.ok)
-    total = sum(len(g["quotes"]) for g in market_groups)
-    print("  %d/%d quotes resolved" % (ok, total))
 
     print("- Markets: watchlist")
     watchlist = _safe(
         "watchlist", lambda: markets.fetch_quotes(cfg.WATCHLIST, timeout=timeout), [])
+
+    # Fill any symbol that failed this run from the last-known-good cache (clearly
+    # flagged as stale), then persist the fresh values for next time.
+    all_quote_lists = [g["quotes"] for g in market_groups] + [watchlist]
+    for quotes in all_quote_lists:
+        markets.apply_cache(quotes, market_cache)
+    markets.save_cache(cache_path, all_quote_lists)
+
+    flat = [q for quotes in all_quote_lists for q in quotes]
+    live = sum(1 for q in flat if q.ok and not q.stale)
+    stale = sum(1 for q in flat if q.stale)
+    print("  %d live, %d from cache, %d/%d total resolved" % (
+        live, stale, sum(1 for q in flat if q.ok), len(flat)))
 
     print("- News: %d feeds" % len(cfg.NEWS_FEEDS))
     news_buckets = _safe("news", lambda: news.gather(

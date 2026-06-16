@@ -3,18 +3,23 @@ name: Build Morning Dispatch
 # ---------------------------------------------------------------------------
 # Schedule notes (GitHub cron is always UTC and does NOT observe DST):
 #
+#   18:20 UTC  ->  5:20am AEDT (summer)   |  4:20am AEST (winter)
 #   19:20 UTC  ->  6:20am AEDT (summer)   |  5:20am AEST (winter)
 #   20:20 UTC  ->  7:20am AEDT (summer)   |  6:20am AEST (winter)
 #
-# Running BOTH means the briefing is always freshly built and live before
-# 7:00am local in both halves of the year:
-#   - Summer (AEDT): the 19:20 run lands it by ~6:20am, using futures.
+# Three runs guarantee the briefing is live well before 7:00am local all year,
+# with headroom for GitHub's cron delays (scheduled jobs often start 10-30+ min
+# late on shared runners):
+#   - Summer (AEDT): the 18:20 + 19:20 runs land it by ~5:20-6:20am on futures,
+#     so even a badly delayed run still beats 7am.
 #   - Winter (AEST): the 20:20 run lands it by ~6:20am, *after* the US cash
 #     close (06:00 AEST), so it captures the closing prints.
-# Each run fully overwrites the page; running twice is harmless + resilient.
+# Each run fully overwrites the page; running again is harmless + resilient, and
+# the last-known-good market cache covers any run a data source happens to block.
 # ---------------------------------------------------------------------------
 on:
   schedule:
+    - cron: "20 18 * * *"
     - cron: "20 19 * * *"
     - cron: "20 20 * * *"
   workflow_dispatch: {}          # lets you trigger a build by hand any time
@@ -45,12 +50,12 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: python3 generate.py --out public
 
-      - name: Persist dated archive
+      - name: Persist dated archive + market cache
         continue-on-error: true        # never let archiving break the deploy
         run: |
           git config user.name "dispatch-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add public/archive
+          git add public/archive data/market_cache.json
           git commit -m "archive: $(date -u +%F)" || echo "nothing new to archive"
           git push || echo "push skipped"
 

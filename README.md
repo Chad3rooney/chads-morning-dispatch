@@ -36,9 +36,16 @@ Everything is steered from one file: [`dispatch/config.py`](dispatch/config.py).
 
 ## Design principles
 
-- **Zero dependencies.** The whole generator is the Python standard library —
-  nothing to `pip install`, nothing to break when a package changes. It runs on
-  any Python 3.7+ and needs no install step in CI. (See `requirements.txt`.)
+- **No Python dependencies.** The whole generator is the Python standard library
+  — nothing to `pip install`, nothing to break when a package changes. It runs on
+  any Python 3.7+ and needs no install step in CI. (See `requirements.txt`.) For
+  market data it will also use the system `curl` when present — see below.
+- **Resilient market data.** Yahoo Finance fingerprint‑blocks Python's TLS and
+  rate‑limits datacenter IPs (like CI runners) hard. The dispatch handles this in
+  two ways: it primes a Yahoo session cookie and fetches through `curl` (whose
+  TLS isn't blocked, and which ships on macOS and GitHub's Ubuntu runners); and
+  it keeps a **last‑known‑good cache** (`data/market_cache.json`) so a blocked
+  run shows the most recent prices flagged *as of <time>* rather than blanks.
 - **Graceful degradation.** Every data source is best‑effort. A dead feed, a
   rate‑limited ticker, a missing API key — each narrows the briefing slightly
   but **never breaks the build**. You always get a page.
@@ -84,14 +91,16 @@ be awake.
 3. **(Optional) Add the AI key:** **Settings → Secrets and variables → Actions →
    New repository secret**, name `ANTHROPIC_API_KEY`.
 4. **Done.** The workflow ([`.github/workflows/dispatch.yml`](.github/workflows/dispatch.yml))
-   runs at **19:20 and 20:20 UTC** daily and publishes to your Pages URL. You can
-   also trigger it any time from the **Actions** tab → *Run workflow*.
+   runs at **18:20, 19:20 and 20:20 UTC** daily and publishes to your Pages URL.
+   You can also trigger it any time from the **Actions** tab → *Run workflow*.
 
-### Why two run times?
-GitHub cron is UTC and ignores daylight saving. Two runs guarantee the page is
-fresh **before 7am local in both halves of the year**, and the winter run lands
-*after* the US cash close so it captures the closing prints. Details are in the
-workflow comments.
+### Why three run times?
+GitHub cron is UTC and ignores daylight saving — and scheduled jobs often start
+10–30+ min late on shared runners. Three runs guarantee the page is fresh **well
+before 7am local in both halves of the year** with headroom for those delays,
+and the winter run lands *after* the US cash close so it captures the closing
+prints. Each run overwrites the page; the market cache covers any run a source
+blocks. Details are in the workflow comments.
 
 ### Alternative: run it on your Mac
 If you'd rather not use GitHub, schedule it locally with `launchd`. A starter

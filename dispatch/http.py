@@ -1,14 +1,19 @@
 """Tiny resilient HTTP layer built on urllib — no third-party packages.
 
 Every external data source (Yahoo Finance, RSS feeds, the Anthropic API) goes
-through here so retries, timeouts and a browser User-Agent are applied
-consistently. The User-Agent matters: Yahoo returns HTTP 429 without one.
+through here so retries, timeouts, a browser User-Agent and a shared cookie jar
+are applied consistently. Two things matter for Yahoo: a browser User-Agent and
+a session cookie — without the cookie Yahoo's finance endpoints return HTTP 429.
 """
 
 import gzip
+import http.cookiejar          # stdlib (absolute import; not the sibling module)
 import json
 import os
+import shutil
 import ssl
+import subprocess
+import tempfile
 import time
 import urllib.request
 import urllib.error
@@ -92,9 +97,58 @@ def _make_ssl_context():
 
 _SSL_CONTEXT = _make_ssl_context()
 
+# A shared cookie jar + opener so a session cookie is captured once and resent
+# on every subsequent request. Yahoo Finance, in particular, returns HTTP 429
+# to cookieless clients; seeding a consent cookie (see markets._prime_session)
+# unblocks it. Cookie processing runs before the error handler, so cookies are
+# captured even from a non-2xx seed response.
+_COOKIE_JAR = http.cookiejar.CookieJar()
+_OPENER = urllib.request.build_opener(
+    urllib.request.HTTPSHandler(context=_SSL_CONTEXT),
+    urllib.request.HTTPCookieProcessor(_COOKIE_JAR),
+)
+
+
+def cookie_count():
+    """Number of cookies currently held — lets callers confirm a primed session."""
+    return len(_COOKIE_JAR)
+
+
+# A second transport: the system `curl`. Some hosts (notably Yahoo Finance via
+# Akamai) fingerprint the TLS handshake and reject Python's urllib — especially
+# on older OpenSSL builds — while accepting curl. curl ships on macOS and on
+# GitHub's Ubuntu runners, so this keeps us reliable in both places without any
+# pip install. It shares its own cookie jar file so a primed session persists
+# across calls. Entirely optional: if curl is absent we simply fall back to
+# urllib and the briefing degrades gracefully, exactly as before.
+_CURL = shutil.which("curl")
+_CURL_JAR = os.path.join(tempfile.gettempdir(), "dispatch-curl-cookies.txt")
+
+
+def _curl_get(url, timeout):
+    """GET via the system curl, sharing a persistent cookie jar. None on any
+    failure or if curl isn't installed."""
+    if not _CURL:
+        return None
+    try:
+        proc = subprocess.run(
+            [_CURL, "-sL", "--compressed",
+             "--max-time", str(int(timeout)),
+             "-A", USER_AGENT,
+             "-H", "Accept-Language: en-AU,en;q=0.9",
+             "-b", _CURL_JAR, "-c", _CURL_JAR, url],
+            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+            timeout=timeout + 5,
+        )
+    except Exception:
+        return None
+    if proc.returncode != 0 or not proc.stdout:
+        return None
+    return proc.stdout.decode("utf-8", "replace")
+
 
 def _open(req, timeout):
-    resp = urllib.request.urlopen(req, timeout=timeout, context=_SSL_CONTEXT)
+    resp = _OPENER.open(req, timeout=timeout)
     raw = resp.read()
     if resp.headers.get("Content-Encoding") == "gzip":
         try:
@@ -105,12 +159,19 @@ def _open(req, timeout):
     return raw.decode(charset, errors="replace")
 
 
-def get(url, timeout=DEFAULT_TIMEOUT, retries=3, headers=None):
+def get(url, timeout=DEFAULT_TIMEOUT, retries=3, headers=None, prefer_curl=False):
     """GET a URL as text, with retries + exponential backoff.
 
     Returns the body string, or None if every attempt failed. Never raises —
     a failed source must degrade the briefing gracefully, not break it.
+
+    prefer_curl=True routes straight through the system curl when available
+    (used for Yahoo, which fingerprint-blocks Python's TLS). Either way, curl is
+    tried as a last-ditch fallback if the urllib path fails and curl is present.
     """
+    if prefer_curl and _CURL:
+        return _curl_get(url, timeout)
+
     hdrs = {
         "User-Agent": USER_AGENT,
         "Accept": "*/*",
@@ -120,24 +181,23 @@ def get(url, timeout=DEFAULT_TIMEOUT, retries=3, headers=None):
     if headers:
         hdrs.update(headers)
 
-    last_err = None
     for attempt in range(retries):
         try:
             req = urllib.request.Request(url, headers=hdrs)
             return _open(req, timeout)
         except (urllib.error.HTTPError, urllib.error.URLError, OSError) as e:
-            last_err = e
             code = getattr(e, "code", None)
             # Don't waste retries on a hard 404/410.
             if code in (404, 410):
                 break
             time.sleep(0.6 * (2 ** attempt))
-    return None
+    # urllib exhausted — try curl once before giving up.
+    return _curl_get(url, timeout)
 
 
-def get_json(url, timeout=DEFAULT_TIMEOUT, retries=3, headers=None):
+def get_json(url, timeout=DEFAULT_TIMEOUT, retries=3, headers=None, prefer_curl=False):
     """GET and parse JSON, or None on any failure."""
-    body = get(url, timeout=timeout, retries=retries, headers=headers)
+    body = get(url, timeout=timeout, retries=retries, headers=headers, prefer_curl=prefer_curl)
     if not body:
         return None
     try:
