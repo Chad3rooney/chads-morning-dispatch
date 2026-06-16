@@ -1,0 +1,9 @@
+# Chad's Morning Dispatch has NO third-party dependencies.
+#
+# The entire generator runs on the Python standard library (urllib, xml.etree,
+# json, datetime, ...). This is deliberate: nothing to install, nothing to
+# break when a package drops a Python version or changes its API. It runs on
+# any Python 3.7+ and needs no `pip install` step in CI.
+#
+# The optional Claude synthesis layer is also called over plain HTTPS — no SDK.
+# It only needs the ANTHROPIC_API_KEY environment variable to be set.

@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+
+# Build output: keep the dated archive (history), ignore the volatile latest page.
+/public/index.html
+
+# Local environment
+.env

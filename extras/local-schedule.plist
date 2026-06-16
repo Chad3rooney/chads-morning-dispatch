@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Optional: run the dispatch locally on a Mac via launchd, instead of GitHub.
+  Your Mac must be awake at the scheduled time (consider `caffeinate` or a
+  Power schedule). The GitHub Actions route is more reliable for "always on".
+
+  Setup:
+    1. Edit the two paths below (WorkingDirectory + ProgramArguments) to match
+       where this folder lives, and your python3 path (`which python3`).
+    2. Optionally set ANTHROPIC_API_KEY in EnvironmentVariables.
+    3. Install:
+         cp extras/local-schedule.plist ~/Library/LaunchAgents/com.chad.dispatch.plist
+         launchctl load ~/Library/LaunchAgents/com.chad.dispatch.plist
+    4. Test immediately:
+         launchctl start com.chad.dispatch
+
+  This fires at 06:20 local time daily (StartCalendarInterval is local time, so
+  it tracks AEST/AEDT automatically — one of launchd's advantages over UTC cron).
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.chad.dispatch</string>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/chad.butterworth/Desktop/MCD</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/env</string>
+    <string>python3</string>
+    <string>generate.py</string>
+    <string>--out</string>
+    <string>public</string>
+  </array>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>SSL_CERT_FILE</key>
+    <string>/etc/ssl/cert.pem</string>
+    <!-- <key>ANTHROPIC_API_KEY</key><string>sk-ant-...</string> -->
+  </dict>
+
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Hour</key><integer>6</integer>
+    <key>Minute</key><integer>20</integer>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/dispatch.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/dispatch.err</string>
+</dict>
+</plist>
