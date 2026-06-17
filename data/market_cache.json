@@ -1,1 +1,177 @@
-{}
+{
+  "AAPL": {
+    "currency": "USD",
+    "name": "Apple Inc",
+    "prev_close": 296.42,
+    "price": 299.24,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "AUDUSD=X": {
+    "currency": null,
+    "name": "AUD/USD",
+    "prev_close": 0.7066,
+    "price": 0.7068,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "BHP.AX": {
+    "currency": "AUD",
+    "name": "BHP Group Ltd",
+    "prev_close": 65.19,
+    "price": 65.68,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "BTC-USD": {
+    "currency": null,
+    "name": "Bitcoin/US Dollar FX Spot Rate",
+    "prev_close": 65780.63,
+    "price": 65749.05,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "BZ=F": {
+    "currency": "USD",
+    "name": "ICE Brent Crude (Aug'26)",
+    "prev_close": 78.96,
+    "price": 79.51,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "CBA.AX": {
+    "currency": "AUD",
+    "name": "Commonwealth Bank of Australia",
+    "prev_close": 161.88,
+    "price": 163.07,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "CL=F": {
+    "currency": "USD",
+    "name": "WTI Crude (Jul'26)",
+    "prev_close": 76.05,
+    "price": 76.6,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "CSL.AX": {
+    "currency": "AUD",
+    "name": "CSL Ltd",
+    "prev_close": 106.25,
+    "price": 105.83,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "DX-Y.NYB": {
+    "currency": "USD",
+    "name": "ICE U.S. Dollar Index",
+    "prev_close": 99.54,
+    "price": 99.506,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "ES=F": {
+    "currency": "USD",
+    "name": "S&P 500 Index",
+    "prev_close": 7554.29,
+    "price": 7511.35,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "FMG.AX": {
+    "currency": "AUD",
+    "name": "Fortescue Ltd",
+    "prev_close": 20.54,
+    "price": 20.62,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "GC=F": {
+    "currency": "USD",
+    "name": "Gold COMEX (Aug'26)",
+    "prev_close": 4354.4,
+    "price": 4357.3,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "HG=F": {
+    "currency": "USD",
+    "name": "Copper (Jul'26)",
+    "prev_close": 6.5035,
+    "price": 6.4955,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "NG=F": {
+    "currency": "USD",
+    "name": "Natural Gas (Jul'26)",
+    "prev_close": 3.239,
+    "price": 3.251,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "NQ=F": {
+    "currency": "USD",
+    "name": "NASDAQ 100 Index",
+    "prev_close": 30543.918,
+    "price": 29968.13,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "NVDA": {
+    "currency": "USD",
+    "name": "NVIDIA Corp",
+    "prev_close": 212.45,
+    "price": 207.41,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "PLS.AX": {
+    "currency": "AUD",
+    "name": "PLS Group Ltd",
+    "prev_close": 6.19,
+    "price": 6.28,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "RIO.AX": {
+    "currency": "AUD",
+    "name": "Rio Tinto Ltd",
+    "prev_close": 188.72,
+    "price": 188.08,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "RTY=F": {
+    "currency": "USD",
+    "name": "Russell 2000 Index",
+    "prev_close": 2939.195,
+    "price": 2939.195,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "SI=F": {
+    "currency": "USD",
+    "name": "Silver COMEX (Jul'26)",
+    "prev_close": 70.013,
+    "price": 70.235,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "WDS.AX": {
+    "currency": "AUD",
+    "name": "Woodside Energy Group Ltd",
+    "prev_close": 30.04,
+    "price": 29.26,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "YM=F": {
+    "currency": "USD",
+    "name": "Dow Jones Industrial Average",
+    "prev_close": 51671.03,
+    "price": 51999.67,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "^AORD": {
+    "currency": "AUD",
+    "name": "Australia All Ordinaries",
+    "prev_close": 9131.3,
+    "price": 9135.7,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "^AXJO": {
+    "currency": "AUD",
+    "name": "S&P/ASX 200",
+    "prev_close": 8917.7,
+    "price": 8922.8,
+    "ts": "2026-06-17T00:39:28Z"
+  },
+  "^TNX": {
+    "currency": null,
+    "name": "U.S. 10 Year Treasury",
+    "prev_close": 4.428,
+    "price": 4.435,
+    "ts": "2026-06-17T00:39:28Z"
+  }
+}
