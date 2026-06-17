@@ -22,6 +22,11 @@ Symbols use Yahoo Finance notation:
   GC=F  Gold                 BHP.AX BHP on the ASX
   CL=F  WTI crude            AUDUSD=X  AUD/USD
 Find any symbol at https://finance.yahoo.com (search, copy the symbol).
+
+A few instruments only exist on the CNBC feed (the primary, since Yahoo blocks
+datacenter IPs) and are written in CNBC notation: @TIO.1 (Iron Ore 62%),
+AU10Y (Australia 10Y bond), US2Y (US 2Y Treasury). See dispatch/markets.py
+CNBC_MAP for how Yahoo symbols translate.
 ============================================================================
 """
 
@@ -32,7 +37,7 @@ SITE = {
     "title": "Chad's Morning Dispatch",
     "owner_name": "Chad",                 # used in the greeting ("Good morning, Chad")
     "tagline": "Markets · Mining · Geopolitics · The world overnight",
-    "max_news_per_category": 6,           # quality over quantity
+    "max_news_per_category": 8,           # quality over quantity
     "news_lookback_hours": 30,            # ignore stories older than this
     "request_timeout": 12,                # seconds per network call
     # Last-known-good market values live here. If a source is temporarily
@@ -48,8 +53,8 @@ SITE = {
 # ---------------------------------------------------------------------------
 MARKET_GROUPS = [
     {
-        "title": "US Futures",
-        "note": "Overnight / pre-market",
+        "title": "US Markets",
+        "note": "Futures / latest",
         "tickers": [
             ("ES=F", "S&P 500"),
             ("NQ=F", "Nasdaq 100"),
@@ -58,17 +63,24 @@ MARKET_GROUPS = [
         ],
     },
     {
-        "title": "Commodities",
-        "note": "Resources & energy",
+        "title": "Metals & Mining",
+        "note": "Precious & base metals",
         "tickers": [
             ("GC=F", "Gold"),
             ("SI=F", "Silver"),
             ("HG=F", "Copper"),
+            ("@TIO.1", "Iron Ore 62%"),   # CNBC-native; key for AU miners
+            ("PL=F", "Platinum"),
+            ("PA=F", "Palladium"),
+        ],
+    },
+    {
+        "title": "Energy",
+        "note": "Oil & gas",
+        "tickers": [
             ("CL=F", "WTI Crude"),
             ("BZ=F", "Brent Crude"),
             ("NG=F", "Nat Gas"),
-            # Iron ore has no clean Yahoo spot symbol — tracked via BHP/RIO/FMG
-            # in the watchlist below. See README "Extending" for adding a feed.
         ],
     },
     {
@@ -78,15 +90,35 @@ MARKET_GROUPS = [
             ("^AXJO", "ASX 200"),
             ("^AORD", "All Ordinaries"),
             ("AUDUSD=X", "AUD / USD"),
+            ("AU10Y", "AU 10Y Bond"),     # CNBC-native
         ],
     },
     {
-        "title": "Global & FX",
-        "note": "Currencies & risk",
+        "title": "Currencies",
+        "note": "Major FX pairs",
         "tickers": [
-            ("DX-Y.NYB", "US Dollar Index"),
+            ("EURUSD=X", "EUR / USD"),
+            ("USDJPY=X", "USD / JPY"),
+            ("GBPUSD=X", "GBP / USD"),
+            ("NZDUSD=X", "NZD / USD"),
+        ],
+    },
+    {
+        "title": "Rates & Risk",
+        "note": "Yields, USD & volatility",
+        "tickers": [
+            ("US2Y", "US 2Y Yield"),      # CNBC-native
             ("^TNX", "US 10Y Yield"),
+            ("DX-Y.NYB", "US Dollar Index"),
+            ("^VIX", "VIX Volatility"),
+        ],
+    },
+    {
+        "title": "Crypto",
+        "note": "Digital assets",
+        "tickers": [
             ("BTC-USD", "Bitcoin"),
+            ("ETH-USD", "Ethereum"),
         ],
     },
 ]
@@ -96,15 +128,26 @@ MARKET_GROUPS = [
 # A flat list of (symbol, label). Keep it to the names you actually track.
 # ---------------------------------------------------------------------------
 WATCHLIST = [
+    # Miners & resources (the core focus)
     ("BHP.AX", "BHP Group"),
     ("RIO.AX", "Rio Tinto"),
     ("FMG.AX", "Fortescue"),
-    ("WDS.AX", "Woodside Energy"),
+    ("MIN.AX", "Mineral Resources"),
     ("PLS.AX", "Pilbara Minerals"),
+    ("LYC.AX", "Lynas Rare Earths"),
+    ("NST.AX", "Northern Star"),
+    # Energy
+    ("WDS.AX", "Woodside Energy"),
+    ("STO.AX", "Santos"),
+    # Banks & blue chips
     ("CBA.AX", "Commonwealth Bank"),
+    ("MQG.AX", "Macquarie Group"),
     ("CSL.AX", "CSL Ltd"),
+    # US tech
     ("NVDA", "NVIDIA"),
+    ("MSFT", "Microsoft"),
     ("AAPL", "Apple"),
+    ("TSLA", "Tesla"),
 ]
 
 # ---------------------------------------------------------------------------
@@ -126,6 +169,7 @@ NEWS_CATEGORIES = [
 NEWS_FEEDS = [
     # --- Business & Markets ---
     {"name": "ABC Business",        "category": "business",    "url": "https://www.abc.net.au/news/feed/51892/rss.xml"},
+    {"name": "Guardian AU Business","category": "business",    "url": "https://www.theguardian.com/au/business/rss"},
     {"name": "CNBC Markets",        "category": "business",    "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=15839135"},
     {"name": "CNBC Finance",        "category": "business",    "url": "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=10000664"},
     {"name": "MarketWatch Top",     "category": "business",    "url": "https://feeds.content.dowjones.io/public/rss/mw_topstories"},
@@ -145,6 +189,7 @@ NEWS_FEEDS = [
     # --- Mining, Resources & Energy ---
     {"name": "Mining.com",          "category": "mining",      "url": "https://www.mining.com/feed/"},
     {"name": "Mining Weekly",       "category": "mining",      "url": "https://www.miningweekly.com/topic/feed/mining"},
+    {"name": "Stockhead Resources", "category": "mining",      "url": "https://stockhead.com.au/category/resources/feed/"},
     {"name": "OilPrice.com",        "category": "mining",      "url": "https://oilprice.com/rss/main"},
     {"name": "ABC Rural",           "category": "mining",      "url": "https://www.abc.net.au/news/feed/51892/rss.xml", "weight": 0.5},
 ]

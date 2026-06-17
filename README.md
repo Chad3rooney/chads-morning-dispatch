@@ -24,13 +24,13 @@ already there.
 
 | Section | What it gives you |
 |---|---|
-| **Market Snapshot** | US futures (S&P/Nasdaq/Dow/Russell), commodities (gold, silver, copper, oil, gas), Australia (ASX 200, All Ords, AUD/USD), global & FX. Price, change, % — colour + arrows. |
-| **Overnight Themes** | 4–6 high‑signal themes synthesising the night — *what happened and why it matters*. Written by Claude when a key is set; a clean rule‑based version otherwise. |
-| **What to Watch Today** | The catalysts, releases and risks worth monitoring during the day. |
-| **News & Announcements** | Categorised: Business & Markets · Australia · Geopolitics & Global · Mining, Resources & Energy. Title, excerpt, source, age, direct link. |
+| **Market Snapshot** | 27 instruments in 7 groups — US markets, metals & mining (incl. **iron ore**, platinum, palladium), energy, Australia (ASX 200, All Ords, AUD/USD, **AU 10Y bond**), major FX, rates & risk (US 2Y/10Y, USD index, **VIX**), crypto (BTC/ETH). Price, change, %, a **day-range bar**, colour + arrows, plus an auto **big-movers** strip and up/down breadth. |
+| **Overnight Themes** | 4–6 high‑signal themes synthesising the night — *what happened and why it matters*. Written by Claude when a key is set; a sharp rule‑based version otherwise. |
+| **What to Watch Today** | The catalysts, releases and risks worth monitoring during the day — market movers **and** developing news, never empty. |
+| **News & Announcements** | Two-column, categorised: Business & Markets · Australia · Geopolitics & Global · Mining, Resources & Energy. Full title, excerpt, source, age, direct link. |
 | **Personal Watchlist** | Your selected stocks/indices with price, change and %. |
 
-Everything is steered from one file: [`dispatch/config.py`](dispatch/config.py).
+Plus a real **light/dark toggle** (remembers your choice, defaults to your system), a **sticky section nav**, and a reading-time estimate. Everything is steered from one file: [`dispatch/config.py`](dispatch/config.py).
 
 ---
 
@@ -38,14 +38,15 @@ Everything is steered from one file: [`dispatch/config.py`](dispatch/config.py).
 
 - **No Python dependencies.** The whole generator is the Python standard library
   — nothing to `pip install`, nothing to break when a package changes. It runs on
-  any Python 3.7+ and needs no install step in CI. (See `requirements.txt`.) For
-  market data it will also use the system `curl` when present — see below.
-- **Resilient market data.** Yahoo Finance fingerprint‑blocks Python's TLS and
-  rate‑limits datacenter IPs (like CI runners) hard. The dispatch handles this in
-  two ways: it primes a Yahoo session cookie and fetches through `curl` (whose
-  TLS isn't blocked, and which ships on macOS and GitHub's Ubuntu runners); and
-  it keeps a **last‑known‑good cache** (`data/market_cache.json`) so a blocked
-  run shows the most recent prices flagged *as of <time>* rather than blanks.
+  any Python 3.7+ and needs no install step in CI. (See `requirements.txt`.)
+- **Resilient market data.** The primary source is **CNBC's keyless quote API**,
+  which is reliable from datacenter IPs (GitHub's runners) where Yahoo Finance
+  fingerprint‑blocks Python's TLS and rate‑limits hard. One batched request
+  resolves stocks, indices, commodities, FX, yields, crypto and ASX tickers.
+  Yahoo (cookie‑primed, via `curl` when present) is used only to upgrade the US
+  equity‑index futures to true overnight futures when reachable. A
+  **last‑known‑good cache** (`data/market_cache.json`) covers any blocked run,
+  showing the most recent prices flagged *as of <time>* rather than blanks.
 - **Graceful degradation.** Every data source is best‑effort. A dead feed, a
   rate‑limited ticker, a missing API key — each narrows the briefing slightly
   but **never breaks the build**. You always get a page.

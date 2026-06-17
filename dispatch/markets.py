@@ -30,11 +30,19 @@ CNBC_URL = ("https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/"
 # The four equity-index futures have no CNBC future, so they map to the cash
 # index as a stand-in; Yahoo upgrades them to real futures when available.
 CNBC_MAP = {
-    "ES=F": ".SPX", "NQ=F": ".NDX", "YM=F": ".DJI", "RTY=F": ".RUT",
-    "GC=F": "@GC.1", "SI=F": "@SI.1", "HG=F": "@HG.1",
+    # US equity-index futures -> CNBC cash index (Yahoo upgrades to real futures)
+    "ES=F": ".SPX", "NQ=F": ".NDX", "YM=F": ".DJI", "RTY=F": ".RUT", "^VIX": ".VIX",
+    # Metals & energy
+    "GC=F": "@GC.1", "SI=F": "@SI.1", "HG=F": "@HG.1", "PL=F": "@PL.1", "PA=F": "@PA.1",
     "CL=F": "@CL.1", "BZ=F": "@LCO.1", "NG=F": "@NG.1",
-    "^AXJO": ".AXJO", "^AORD": ".AORD", "AUDUSD=X": "AUD=",
-    "DX-Y.NYB": ".DXY", "^TNX": "US10Y", "BTC-USD": "BTC=",
+    # Australia + FX
+    "^AXJO": ".AXJO", "^AORD": ".AORD",
+    "AUDUSD=X": "AUD=", "EURUSD=X": "EUR=", "USDJPY=X": "JPY=",
+    "GBPUSD=X": "GBP=", "NZDUSD=X": "NZD=",
+    # Rates, dollar, crypto
+    "DX-Y.NYB": ".DXY", "^TNX": "US10Y", "BTC-USD": "BTC=", "ETH-USD": "ETH=",
+    # CNBC-native instruments (no clean Yahoo symbol) are used verbatim in config:
+    #   @TIO.1 = Iron Ore 62%, AU10Y = Australia 10Y bond, US2Y = US 2Y Treasury
 }
 EQUITY_FUTURES = frozenset(("ES=F", "NQ=F", "YM=F", "RTY=F"))
 
@@ -72,15 +80,34 @@ def _prime_session(timeout):
 class Quote(object):
     """One instrument's snapshot."""
 
-    def __init__(self, symbol, label, price, prev_close, currency=None, name=None):
+    def __init__(self, symbol, label, price, prev_close, currency=None, name=None,
+                 day_open=None, day_high=None, day_low=None,
+                 year_high=None, year_low=None):
         self.symbol = symbol
         self.label = label
         self.price = price
         self.prev_close = prev_close
         self.currency = currency
         self.name = name
+        self.day_open = day_open
+        self.day_high = day_high
+        self.day_low = day_low
+        self.year_high = year_high
+        self.year_low = year_low
         self.stale = False          # True when filled from the last-known-good cache
         self.as_of = ""             # friendly timestamp of the cached value
+
+    @property
+    def day_range_pct(self):
+        """Where `price` sits in the day's low–high band, 0..100, or None.
+
+        Drives the day-range micro-bar in the snapshot. None when the band is
+        missing or degenerate (e.g. iron ore, which only has a daily settle).
+        """
+        lo, hi, p = self.day_low, self.day_high, self.price
+        if None in (lo, hi, p) or hi <= lo:
+            return None
+        return max(0.0, min(100.0, (p - lo) / (hi - lo) * 100.0))
 
     @property
     def ok(self):
@@ -129,6 +156,11 @@ def _fetch_one(symbol, label, timeout):
             prev_close=prev,
             currency=meta.get("currency"),
             name=meta.get("shortName") or meta.get("longName"),
+            day_open=meta.get("regularMarketOpen"),
+            day_high=meta.get("regularMarketDayHigh"),
+            day_low=meta.get("regularMarketDayLow"),
+            year_high=meta.get("fiftyTwoWeekHigh"),
+            year_low=meta.get("fiftyTwoWeekLow"),
         )
     # Failed — return a placeholder so the caller knows it was requested.
     return Quote(symbol, label, None, None)
@@ -177,6 +209,11 @@ def _fetch_cnbc_batch(pairs, timeout):
             symbol=symbol, label=label, price=price,
             prev_close=_parse_num(q.get("previous_day_closing")),
             currency=q.get("currencyCode"), name=q.get("name"),
+            day_open=_parse_num(q.get("open")),
+            day_high=_parse_num(q.get("high")),
+            day_low=_parse_num(q.get("low")),
+            year_high=_parse_num(q.get("yrhiprice")),
+            year_low=_parse_num(q.get("yrloprice")),
         )
     return out
 
@@ -272,6 +309,11 @@ def apply_cache(quotes, cache):
         q.prev_close = c.get("prev_close")
         q.currency = q.currency or c.get("currency")
         q.name = q.name or c.get("name")
+        q.day_open = c.get("day_open")
+        q.day_high = c.get("day_high")
+        q.day_low = c.get("day_low")
+        q.year_high = c.get("year_high")
+        q.year_low = c.get("year_low")
         q.stale = True
         q.as_of = _friendly_ts(c.get("ts", ""))
     return quotes
@@ -290,6 +332,11 @@ def save_cache(path, quote_lists):
                     "prev_close": q.prev_close,
                     "currency": q.currency,
                     "name": q.name,
+                    "day_open": q.day_open,
+                    "day_high": q.day_high,
+                    "day_low": q.day_low,
+                    "year_high": q.year_high,
+                    "year_low": q.year_low,
                     "ts": now,
                 }
     try:

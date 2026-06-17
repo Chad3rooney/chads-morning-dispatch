@@ -173,7 +173,7 @@ def _markets_theme(market_groups):
     body = ("%s — %d of %d tracked instruments higher. The biggest overnight moves: "
             "%s. That sets the backdrop for the local session." % (
                 breadth, len(gainers), len(ok), moves))
-    return {"title": "Markets — the overnight picture", "body": body}
+    return {"title": "The overnight market picture", "kicker": "Markets", "body": body}
 
 
 def _clip(text, n):
@@ -196,7 +196,9 @@ def _category_themes(cfg, news_buckets, room):
         body = lead.summary or lead.title
         if len(items) > 1:
             body = (body + " Also developing: " + items[1].title).strip()
-        themes.append({"title": "%s — %s" % (c["title"], _clip(lead.title, 72)), "body": body})
+        # Full headline as the theme title (the renderer gives it a category
+        # kicker) — never truncate, so nothing reads as "cut off".
+        themes.append({"title": lead.title, "kicker": c["title"], "body": body})
         room -= 1
     return themes
 
