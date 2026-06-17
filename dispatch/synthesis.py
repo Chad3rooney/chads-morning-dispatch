@@ -129,54 +129,104 @@ def _via_claude(cfg, market_groups, news_buckets, date_label, api_key):
 
 
 # --------------------------------------------------------------------------
-# Rule-based fallback — no LLM. Clusters the freshest headlines into themes.
+# Rule-based fallback — no LLM, no cost. Synthesises the snapshot and the
+# freshest headlines into themes and a "what to watch" list that is never empty.
+# Deliberately written to read like a brief analyst note rather than a raw list.
 # --------------------------------------------------------------------------
-def _fallback(cfg, market_groups, news_buckets):
-    # Mood from breadth of US futures.
-    mood = "A quiet overnight session."
+def _all_quotes(market_groups):
+    return [q for g in market_groups for q in g["quotes"] if q.ok]
+
+
+def _mood(market_groups):
     futures = []
     for g in market_groups:
         if "futures" in g["title"].lower() or g["title"] == "US Futures":
             futures = [q for q in g["quotes"] if q.ok]
-    if futures:
-        avg = sum(q.pct for q in futures) / len(futures)
-        if avg > 0.4:
-            mood = "US futures point higher; a constructive overnight tone."
-        elif avg < -0.4:
-            mood = "US futures point lower; a cautious overnight tone."
-        else:
-            mood = "US futures are little changed; a measured overnight tone."
+    if not futures:
+        ok = _all_quotes(market_groups)
+        if not ok:
+            return "Markets data is thin this run; leading with the overnight news."
+        futures = ok
+    avg = sum(q.pct for q in futures) / len(futures)
+    if avg > 0.4:
+        return "US futures point higher; a constructive, risk-on overnight tone."
+    if avg < -0.4:
+        return "US futures point lower; a cautious, risk-off overnight tone."
+    return "US futures are little changed; a measured, wait-and-see overnight tone."
 
-    # Themes: lead headline from each populated category.
+
+def _markets_theme(market_groups):
+    """A single synthesised paragraph on the overnight market picture."""
+    ok = _all_quotes(market_groups)
+    if not ok:
+        return None
+    gainers = [q for q in ok if q.pct > 0]
+    losers = [q for q in ok if q.pct < 0]
+    if len(gainers) > len(losers) * 1.3:
+        breadth = "Risk appetite looks firm"
+    elif len(losers) > len(gainers) * 1.3:
+        breadth = "Caution is the dominant note"
+    else:
+        breadth = "The picture is mixed"
+    movers = sorted(ok, key=lambda q: abs(q.pct), reverse=True)[:3]
+    moves = "; ".join("%s %+.2f%%" % (q.label, q.pct) for q in movers)
+    body = ("%s — %d of %d tracked instruments higher. The biggest overnight moves: "
+            "%s. That sets the backdrop for the local session." % (
+                breadth, len(gainers), len(ok), moves))
+    return {"title": "Markets — the overnight picture", "body": body}
+
+
+def _category_themes(cfg, news_buckets, room):
     themes = []
     for c in cfg.NEWS_CATEGORIES:
+        if room <= 0:
+            break
         items = news_buckets.get(c["key"], [])
         if not items:
             continue
         lead = items[0]
-        extra = ("Also: " + items[1].title) if len(items) > 1 else ""
-        body = (lead.summary or lead.title)
-        if extra:
-            body = (body + " " + extra).strip()
-        themes.append({"title": "%s — %s" % (c["title"], lead.title[:60]), "body": body})
-        if len(themes) >= cfg.SYNTHESIS["max_themes"]:
-            break
+        body = lead.summary or lead.title
+        if len(items) > 1:
+            body = (body + " Also developing: " + items[1].title).strip()
+        themes.append({"title": "%s — %s" % (c["title"], lead.title[:64]), "body": body})
+        room -= 1
+    return themes
 
-    # Watch: biggest movers in the snapshot.
-    movers = []
-    for g in market_groups:
-        for q in g["quotes"]:
-            if q.ok:
-                movers.append(q)
-    movers.sort(key=lambda q: abs(q.pct), reverse=True)
-    watch = []
-    for q in movers[:cfg.SYNTHESIS["max_watch_items"]]:
+
+def _fallback(cfg, market_groups, news_buckets):
+    max_themes = cfg.SYNTHESIS["max_themes"]
+    max_watch = cfg.SYNTHESIS["max_watch_items"]
+
+    # Themes: a synthesised markets paragraph, then the lead per news category.
+    themes = []
+    mkt = _markets_theme(market_groups)
+    if mkt:
+        themes.append(mkt)
+    themes.extend(_category_themes(cfg, news_buckets, max_themes - len(themes)))
+
+    # Watch: biggest market movers first, then news leads so it's never empty.
+    watch, seen = [], set()
+    movers = sorted(_all_quotes(market_groups), key=lambda q: abs(q.pct), reverse=True)
+    for q in movers[: max(0, max_watch - 2)]:
+        verb = "extending higher" if q.pct > 0 else "under pressure"
         watch.append({
             "title": "%s (%+.2f%%)" % (q.label, q.pct),
-            "detail": "A notable overnight move worth tracking into the local session.",
+            "detail": "%s overnight — watch for follow-through into the local session." % verb.capitalize(),
         })
+        seen.add(q.label)
+    for key in ("geopolitics", "business", "australia", "mining"):
+        if len(watch) >= max_watch:
+            break
+        items = news_buckets.get(key, [])
+        if items and items[0].title not in seen:
+            s = items[0]
+            watch.append({
+                "title": s.title[:72],
+                "detail": "Developing story (%s) — worth tracking today." % (s.source or "see link"),
+            })
+            seen.add(s.title)
 
-    return {"mood": mood, "themes": themes, "watch": watch, "source": "fallback"}
+    return {"mood": _mood(market_groups), "themes": themes, "watch": watch, "source": "fallback"}
 
 
 # --------------------------------------------------------------------------
