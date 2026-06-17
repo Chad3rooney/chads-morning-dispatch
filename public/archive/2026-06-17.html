@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Chad&#x27;s Morning Dispatch</title>
+<style>
+:root{
+  --bg:#f6f4ef; --panel:#fffdf9; --ink:#1c1d22; --ink-soft:#54565f;
+  --ink-faint:#8a8c95; --line:#e7e3da; --accent:#2f6f5e; --kicker:#9a6a3c;
+  --up:#1c7d54; --down:#c0392b; --flat:#8a8c95; --shadow:0 1px 2px rgba(40,35,25,.06),0 8px 24px rgba(40,35,25,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#14151a; --panel:#1b1d24; --ink:#ecedf1; --ink-soft:#aab0bd;
+    --ink-faint:#71757f; --line:#2a2d36; --accent:#56b399; --kicker:#cfa06a;
+    --up:#46c08a; --down:#ef6b5c; --flat:#71757f; --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.25);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Inter",sans-serif;
+  line-height:1.55; font-size:16px; letter-spacing:.1px;
+}
+.wrap{max-width:880px; margin:0 auto; padding:32px 20px 64px}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Masthead */
+.masthead{padding:8px 0 22px; border-bottom:1px solid var(--line); margin-bottom:28px}
+.mast-top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.kicker{font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--kicker)}
+.status{display:flex; gap:8px; flex-wrap:wrap}
+.pill{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600;
+  color:var(--ink-soft); background:var(--panel); border:1px solid var(--line);
+  border-radius:999px; padding:4px 10px}
+.pill .dot{width:7px; height:7px; border-radius:50%; background:var(--flat)}
+.pill.live .dot{background:var(--up)}
+.pill.closed .dot{background:var(--ink-faint)}
+.greeting{font-size:31px; line-height:1.15; margin:18px 0 4px; font-weight:760; letter-spacing:-.02em}
+.dateline{margin:0; color:var(--ink-soft); font-size:15px; font-weight:600}
+.tagline{margin:6px 0 0; color:var(--ink-faint); font-size:13.5px}
+
+/* Sections */
+.section{margin:34px 0}
+.section-head{display:flex; align-items:baseline; gap:10px; margin:0 0 16px}
+.section-head h2{font-size:13px; font-weight:750; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-soft); margin:0; padding-bottom:0}
+.badge-fallback{font-size:10.5px; font-weight:600; color:var(--ink-faint);
+  border:1px solid var(--line); border-radius:6px; padding:1px 7px}
+
+/* Market snapshot */
+.market-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px}
+.market-card{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:16px 16px 8px; box-shadow:var(--shadow)}
+.card-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px}
+.card-head h3{font-size:14.5px; margin:0; font-weight:700}
+.card-note{font-size:11px; color:var(--ink-faint)}
+.rows{display:flex; flex-direction:column}
+.row{display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:8px 0; border-top:1px solid var(--line)}
+.row:first-child{border-top:none}
+.q-label{font-size:14px; color:var(--ink-soft); font-weight:560}
+.q-nums{display:flex; flex-direction:column; align-items:flex-end; line-height:1.25}
+.q-price{font-variant-numeric:tabular-nums; font-weight:680; font-size:14.5px}
+.q-chg{font-variant-numeric:tabular-nums; font-size:12px; font-weight:620}
+.q-pct{opacity:.92}
+.q-nums.up{color:var(--up)} .q-nums.down{color:var(--down)} .q-nums.flat{color:var(--flat)}
+.q-nums.up .q-price,.q-nums.down .q-price,.q-nums.flat .q-price{color:var(--ink)}
+.q-unavail,.wl-unavail{font-size:12px; color:var(--ink-faint); font-style:italic}
+.row.muted .q-label{color:var(--ink-faint)}
+.q-asof{display:block; font-size:10px; font-weight:500; color:var(--ink-faint);
+  letter-spacing:.02em; margin-top:1px}
+.is-stale .q-price,.is-stale .wl-price{opacity:.82}
+
+/* Themes */
+.mood{font-size:16.5px; color:var(--ink); margin:0 0 18px; font-weight:560;
+  padding-left:14px; border-left:3px solid var(--accent)}
+.themes{display:flex; flex-direction:column; gap:4px}
+.theme{display:flex; gap:14px; padding:14px 0; border-top:1px solid var(--line)}
+.theme:first-child{border-top:none}
+.theme-num{flex:none; width:26px; height:26px; border-radius:50%; background:var(--accent);
+  color:#fff; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center}
+.theme-body h4{margin:2px 0 4px; font-size:16px; font-weight:700}
+.theme-body p{margin:0; color:var(--ink-soft); font-size:14.5px}
+
+/* Watch */
+.watch-list{list-style:none; margin:0; padding:0; display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px}
+.watch-list li{display:flex; gap:11px; align-items:flex-start; background:var(--panel);
+  border:1px solid var(--line); border-radius:12px; padding:13px 14px; box-shadow:var(--shadow)}
+.watch-dot{flex:none; width:8px; height:8px; border-radius:50%; background:var(--kicker); margin-top:7px}
+.watch-text{display:flex; flex-direction:column; gap:2px}
+.watch-text strong{font-size:14.5px; font-weight:680}
+.watch-detail{font-size:13px; color:var(--ink-soft)}
+
+/* News */
+.news-cat{margin-bottom:26px}
+.news-cat-title{font-size:15px; font-weight:730; margin:0 0 10px; padding-bottom:8px;
+  border-bottom:2px solid var(--line); color:var(--ink)}
+.stories{display:flex; flex-direction:column; gap:2px}
+.story{padding:13px 0; border-top:1px solid var(--line)}
+.story:first-child{border-top:none}
+.story-title{margin:0 0 4px; font-size:15.5px; font-weight:640; line-height:1.35}
+.story-title a{color:var(--ink)}
+.story-title a:hover{color:var(--accent)}
+.ext{font-size:11px; color:var(--ink-faint); font-weight:400}
+.story-sum{margin:0 0 5px; color:var(--ink-soft); font-size:14px; line-height:1.5}
+.story-meta{font-size:11.5px; color:var(--ink-faint); font-weight:600; letter-spacing:.02em; text-transform:uppercase}
+
+/* Watchlist */
+.watchlist{background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  overflow:hidden; box-shadow:var(--shadow)}
+.wl-row{display:grid; grid-template-columns:1fr auto auto auto; gap:12px; align-items:center;
+  padding:11px 16px; border-top:1px solid var(--line)}
+.wl-row:first-child{border-top:none}
+.wl-name{font-weight:600; font-size:14.5px}
+.wl-price{font-variant-numeric:tabular-nums; font-weight:680; text-align:right}
+.wl-chg,.wl-pct{font-variant-numeric:tabular-nums; font-size:13px; font-weight:620; text-align:right; min-width:62px}
+.wl-row.up .wl-chg,.wl-row.up .wl-pct{color:var(--up)}
+.wl-row.down .wl-chg,.wl-row.down .wl-pct{color:var(--down)}
+.wl-row.flat .wl-chg,.wl-row.flat .wl-pct{color:var(--flat)}
+.wl-row.muted{grid-template-columns:1fr auto}
+
+/* Footer */
+.foot{margin-top:48px; padding-top:20px; border-top:1px solid var(--line);
+  color:var(--ink-faint); font-size:12.5px}
+.foot p{margin:0 0 5px}
+.foot-fine{font-size:11.5px}
+
+@media (max-width:520px){
+  .wrap{padding:22px 15px 48px}
+  .greeting{font-size:26px}
+  .market-grid{grid-template-columns:1fr}
+  .wl-row{grid-template-columns:1fr auto auto; row-gap:2px}
+  .wl-pct{display:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="masthead">
+    <div class="mast-top">
+      <span class="kicker">Chad&#x27;s Morning Dispatch</span>
+      <div class="status"><span class="pill live"><span class="dot"></span>US futures live</span><span class="pill live"><span class="dot"></span>ASX open</span></div>
+    </div>
+    <h1 class="greeting">Good morning, Chad.</h1>
+    <p class="dateline">Wednesday, 17 June 2026</p>
+    <p class="tagline">Markets · Mining · Geopolitics · The world overnight</p>
+  </header>
+  <main><section class="section" id="section-markets"><div class="section-head"><h2>Market Snapshot</h2></div><div class="market-grid"><div class="market-card"><div class="card-head"><h3>US Futures</h3><span class="card-note">Overnight / pre-market</span></div><div class="rows"><div class="row muted"><span class="q-label">S&amp;P 500</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Nasdaq 100</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Dow</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Russell 2000</span><span class="q-unavail">unavailable</span></div></div></div><div class="market-card"><div class="card-head"><h3>Commodities</h3><span class="card-note">Resources &amp; energy</span></div><div class="rows"><div class="row muted"><span class="q-label">Gold</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Silver</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Copper</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">WTI Crude</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Brent Crude</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Nat Gas</span><span class="q-unavail">unavailable</span></div></div></div><div class="market-card"><div class="card-head"><h3>Australia</h3><span class="card-note">Local context (prior close)</span></div><div class="rows"><div class="row muted"><span class="q-label">ASX 200</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">All Ordinaries</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">AUD / USD</span><span class="q-unavail">unavailable</span></div></div></div><div class="market-card"><div class="card-head"><h3>Global &amp; FX</h3><span class="card-note">Currencies &amp; risk</span></div><div class="rows"><div class="row muted"><span class="q-label">US Dollar Index</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">US 10Y Yield</span><span class="q-unavail">unavailable</span></div><div class="row muted"><span class="q-label">Bitcoin</span><span class="q-unavail">unavailable</span></div></div></div></div></section><section class="section" id="section-themes"><div class="section-head"><h2>Overnight Themes</h2><span class="badge-fallback" title="Generated without the AI synthesis layer">basic mode</span></div><p class="mood">A quiet overnight session.</p><div class="themes"><div class="theme"><div class="theme-num">1</div><div class="theme-body"><h4>Business &amp; Markets — WA rail union pushes back on proposal for safety lights on t</h4><p>The state&#x27;s union for train drivers says a draft bill mandating more lights on trains is &quot;fundamentally flawed&quot; and would not fix motorists&#x27; behaviour at level crossings. Also: Intel takes a major step toward turning around a business that’s bleeding cash</p></div></div><div class="theme"><div class="theme-num">2</div><div class="theme-body"><h4>Australia — Australia news live: two more men charged with murder over C</h4><p>Follow today’s news live Get our breaking news email , free app or daily news podcast Kyle Sandilands has settled his legal dispute with ARN Media with a $12m cash payment over three years, but Jackie O Henderson’s $82m claim against the… Also: Breaking: Roger Jaensch to return to Tasmanian cabinet in latest reshuffle</p></div></div><div class="theme"><div class="theme-num">3</div><div class="theme-body"><h4>Geopolitics &amp; Global — World Cup 2026: Haaland double gets Norway off to winning st</h4><p>Erling Haaland scored twice on his World Cup debut as Norway got their campaign off to a flying start with a 4-1 over a valiant Iraqi side, who were playing on football&#x27;s biggest stage for the first time in half a century. Also: US midterm primaries 2026 live: Trump pick for Republican candidate in Georgia trails competitor in early counting</p></div></div><div class="theme"><div class="theme-num">4</div><div class="theme-body"><h4>Mining, Resources &amp; Energy — The Smartest Way to Play the AI Boom in 2026</h4><p>If you&#x27;ve been investing in the AI boom, you probably own most of the same names everyone else does. NVIDIA for the chips. Microsoft, Google and Amazon for the cloud. Maybe Meta for the consumer side. Maybe Palantir or one of the AI… Also: Fortuna wins key approval for Senegal gold project</p></div></div></div></section><section class="section" id="section-news"><div class="section-head"><h2>News &amp; Announcements</h2></div><div class="news-cat"><h3 class="news-cat-title">Business &amp; Markets</h3><div class="stories"><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-06-17/union-industry-pushes-back-train-lighting-legislation/106802932" target="_blank" rel="noopener">WA rail union pushes back on proposal for safety lights on trains <span class="ext">↗</span></a></h4><p class="story-sum">The state&#x27;s union for train drivers says a draft bill mandating more lights on trains is &quot;fundamentally flawed&quot; and would not fix motorists&#x27; behaviour at level crossings.</p><div class="story-meta">ABC Business · 1h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/intel-takes-a-major-step-toward-turning-around-a-business-thats-bleeding-cash-ab68cc94?mod=mw_rss_topstories" target="_blank" rel="noopener">Intel takes a major step toward turning around a business that’s bleeding cash <span class="ext">↗</span></a></h4><p class="story-sum">Intel’s new manufacturing process has entered a stage that signals the company is confident in its ability to bring on external customers, analysts say.</p><div class="story-meta">MarketWatch Top · 1h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/im-spending-170-000-to-upgrade-my-home-for-my-aging-parents-can-i-get-tax-breaks-3adf0236?mod=mw_rss_topstories" target="_blank" rel="noopener">I’m spending $170,000 to upgrade my home for my aging parents. Can I get tax breaks? <span class="ext">↗</span></a></h4><p class="story-sum">“Given that at least half of the remodeling cost is to accommodate my disabled mother, I’m wondering if some of this may be tax deductible.”</p><div class="story-meta">MarketWatch Top · 2h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-06-17/us-iran-conflict-deal-fertiliser-supply-farmers-optimism/106802594" target="_blank" rel="noopener">Farmer fertiliser hope as Iran ceasefire promises to reopen supply <span class="ext">↗</span></a></h4><p class="story-sum">Farmers are hoping the US-Iran deal will help free up fertiliser supply and lower costs during the winter cropping season.</p><div class="story-meta">ABC Business · 2h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/chicken-tenders-are-taking-over-the-world-and-kfc-is-rushing-to-keep-up-3b637c99?mod=mw_rss_topstories" target="_blank" rel="noopener">Chicken tenders are taking over the world, and KFC is rushing to keep up <span class="ext">↗</span></a></h4><p class="story-sum">Goodbye bone-in wings, hello tenders and chicken sandwiches that can be easily eaten in the car.</p><div class="story-meta">MarketWatch Top · 2h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/wall-street-cant-stop-talking-about-mangos-stocks-as-the-magnificent-seven-becomes-passe-61b5a453?mod=mw_rss_topstories" target="_blank" rel="noopener">Wall Street can’t stop talking about ‘MANGOS’ stocks as the ‘Magnificent Seven’ becomes passé <span class="ext">↗</span></a></h4><p class="story-sum">Wall Street has a new way to sell the artificial-intelligence trade: take the companies investors most want to own, including some they still cannot buy, and turn them into an acronym.</p><div class="story-meta">MarketWatch Top · 2h ago</div></article></div></div><div class="news-cat"><h3 class="news-cat-title">Australia</h3><div class="stories"><article class="story"><h4 class="story-title"><a href="https://www.theguardian.com/australia-news/live/2026/jun/17/australia-news-live-victoria-marines-weapons-pauline-hanson-one-nation-national-press-club-labor-childcare-medicare-anthony-albanese-ntwnfb" target="_blank" rel="noopener">Australia news live: two more men charged with murder over Chris Baghsarian kidnapping; Labor tips $3.6bn into pay rises for childcare workers <span class="ext">↗</span></a></h4><p class="story-sum">Follow today’s news live Get our breaking news email , free app or daily news podcast Kyle Sandilands has settled his legal dispute with ARN Media with a $12m cash payment over three years, but Jackie O Henderson’s $82m claim against the…</p><div class="story-meta">The Guardian AU · 9m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-06-17/tas-jeremy-rockliff-announcement-cabinet-roger-jaensch/106807032" target="_blank" rel="noopener">Breaking: Roger Jaensch to return to Tasmanian cabinet in latest reshuffle <span class="ext">↗</span></a></h4><p class="story-sum">Tasmanian Premier Jeremy Rockliff announces a reshuffle of his cabinet, following the resignation of former racing minister Jane Howlett on Tuesday.</p><div class="story-meta">ABC Top Stories · 31m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-06-17/prince-george-heading-to-eton-college-to-continue-education/106806668" target="_blank" rel="noopener">Prince George heading to Eton College to continue education <span class="ext">↗</span></a></h4><p class="story-sum">Prince George, who turns 13 in July, will attend Eton College this September, following in the footsteps of his father, Prince William.</p><div class="story-meta">ABC Top Stories · 1h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.theguardian.com/australia-news/2026/jun/17/kyle-sandilands-arn-media-settlement-radio-station" target="_blank" rel="noopener">Kyle Sandilands settles with former radio station for $12m and a helping hand with new media venture <span class="ext">↗</span></a></h4><p class="story-sum">ARN Media settlement of dispute with sacked radio host includes $12.09m cash payment and $1.5m worth of advertising Follow our Australia news live blog for latest updates Get our breaking news email , free app or daily news podcast Kyle…</p><div class="story-meta">The Guardian AU · 1h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-06-17/bluey-launches-in-yolnu-matha-for-naidoc-week/106803138" target="_blank" rel="noopener">Bluey speaks Indigenous language in time for NAIDOC week <span class="ext">↗</span></a></h4><p class="story-sum">The animated award-winning cartoon series Bluey has been translated into Yolŋu Matha, from north-east Arnhem Land, for NAIDOC Week.</p><div class="story-meta">ABC Top Stories · 1h ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-06-17/two-additional-men-charged-over-chris-baghsarian-kidnap-murder/106806626" target="_blank" rel="noopener">Two men charged over alleged kidnapping murder of Sydney grandfather <span class="ext">↗</span></a></h4><p class="story-sum">Robbery and Serious Crime Squad detectives have charged another two men following an investigation into the alleged kidnapping and murder of Chris Baghsarian earlier this year in Sydney&#x27;s north.</p><div class="story-meta">ABC Top Stories · 1h ago</div></article></div></div><div class="news-cat"><h3 class="news-cat-title">Geopolitics &amp; Global</h3><div class="stories"><article class="story"><h4 class="story-title"><a href="https://www.france24.com/en/sport/20260617-world-cup-2026-norway-iraq-haaland-hussein-group-i" target="_blank" rel="noopener">World Cup 2026: Haaland double gets Norway off to winning start against Iraq <span class="ext">↗</span></a></h4><p class="story-sum">Erling Haaland scored twice on his World Cup debut as Norway got their campaign off to a flying start with a 4-1 over a valiant Iraqi side, who were playing on football&#x27;s biggest stage for the first time in half a century.</p><div class="story-meta">Reuters via GDELT · 15m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.theguardian.com/us-news/live/2026/jun/16/midterm-primaries-election-updates-georgia-oklahoma" target="_blank" rel="noopener">US midterm primaries 2026 live: Trump pick for Republican candidate in Georgia trails competitor in early counting <span class="ext">↗</span></a></h4><p class="story-sum">Voters have also been casting ballots in Alabama and Oklahoma, and in Washington DC, for the first time in over 10 years, the city will elect a new mayor in November About 40% of the vote has been counted in Georgia and in the Republican…</p><div class="story-meta">Guardian World · 21m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.theguardian.com/us-news/2026/jun/16/cbs-stephen-colbert-peanuts-the-late-show" target="_blank" rel="noopener">CBS reaches agreement over Stephen Colbert’s use of Peanuts music on The Late Show <span class="ext">↗</span></a></h4><p class="story-sum">On that last day of his hosting, Colbert played Linus and Lucy on air in final dig at the network On his last day hosting CBS’s The Late Show, Stephen Colbert played one of the most iconic songs from the Peanuts soundtrack. “Oh no! I hope…</p><div class="story-meta">Guardian World · 31m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.france24.com/en/video/20260616-world-cup-2026-france-supporters-celebrate-victory-over-senegal" target="_blank" rel="noopener">World Cup 2026: France supporters celebrate victory over Senegal <span class="ext">↗</span></a></h4><p class="story-sum">France defeated Senegal 3-1 in its first group stage match Tuesday. In Paris, fans are thrilled and already dreaming about what’s next in the tournament.</p><div class="story-meta">Reuters via GDELT · 35m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.theguardian.com/us-news/2026/jun/16/ohio-governor-death-penalty-mike-dewine" target="_blank" rel="noopener">Ohio Republican governor urges end to death penalty, saying it cannot be morally justified <span class="ext">↗</span></a></h4><p class="story-sum">Departing Mike DeWine, who co-wrote state’s death penalty bill, says ‘I no longer believe [it] is a deterrent to murder’ Republican governor Mike DeWine, the who co-wrote the bill to reinstate Ohio’s death penalty more than 45 years ago…</p><div class="story-meta">Guardian World · 37m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.aljazeera.com/sports/2026/6/16/iran-will-have-to-leave-us-hours-after-every-world-cup-match-official-says?traffic_source=rss" target="_blank" rel="noopener">Iran will have to leave US hours after every World Cup match, official says <span class="ext">↗</span></a></h4><p class="story-sum">Mehdi Torabi issued a new visa after previous one expired when team returned to Mexico following the New Zealand game.</p><div class="story-meta">Al Jazeera · 41m ago</div></article></div></div><div class="news-cat"><h3 class="news-cat-title">Mining, Resources &amp; Energy</h3><div class="stories"><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Energy/Energy-General/The-Smartest-Way-to-Play-the-AI-Boom-in-2026.html" target="_blank" rel="noopener">The Smartest Way to Play the AI Boom in 2026 <span class="ext">↗</span></a></h4><p class="story-sum">If you&#x27;ve been investing in the AI boom, you probably own most of the same names everyone else does. NVIDIA for the chips. Microsoft, Google and Amazon for the cloud. Maybe Meta for the consumer side. Maybe Palantir or one of the AI…</p><div class="story-meta">OilPrice.com · 22m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.mining.com/fortuna-wins-key-approval-for-senegal-gold-project/" target="_blank" rel="noopener">Fortuna wins key approval for Senegal gold project <span class="ext">↗</span></a></h4><p class="story-sum">Fortuna said this authorization marks a “decisive step” toward obtaining the permit.</p><div class="story-meta">Mining.com · 38m ago</div></article><article class="story"><h4 class="story-title"><a href="https://www.mining.com/rare-earths-americas-hits-44-5-treo-at-shiloh-project-in-georgia/" target="_blank" rel="noopener">Rare Earths Americas hits 44.5% TREO at Shiloh project in Georgia <span class="ext">↗</span></a></h4><p class="story-sum">The company is focused on heavy rare earth elements used in permanent magnets and defense applications.</p><div class="story-meta">Mining.com · 1h ago</div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Alternative-Energy/Solar-Energy/China-Reclaims-Solar-Crown-With-Record-Breaking-Perovskite-Panel.html" target="_blank" rel="noopener">China Reclaims Solar Crown With Record-Breaking Perovskite Panel <span class="ext">↗</span></a></h4><p class="story-sum">Last year, South Korea’s Qcells set the world record for large-area silicon solar cell efficiency, a development that promised to dramatically shrink the size of solar projects and slash costs. Qcells, a subsidiary of South Korea’s giant…</p><div class="story-meta">OilPrice.com · 1h ago</div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Energy/Energy-General/Taiwans-Energy-Crisis-Shows-the-Cost-of-Import-Dependence.html" target="_blank" rel="noopener">Taiwan’s Energy Crisis Shows the Cost of Import Dependence <span class="ext">↗</span></a></h4><p class="story-sum">The issue of energy dependence and its consequences has, in recent months, become a major topic of discussion. The Hormuz crisis has brought energy security to the political agenda with a vengeance amid fuel price caps, rationing, and…</p><div class="story-meta">OilPrice.com · 2h ago</div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Latest-Energy-News/World-News/US-Crude-Oil-Inventories-Down-Again-Losing-52-Million-Barrels-in-9-Weeks.html" target="_blank" rel="noopener">US Crude Oil Inventories Down Again, Losing 52 Million Barrels in 9 Weeks <span class="ext">↗</span></a></h4><p class="story-sum">The American Petroleum Institute (API) estimated that crude oil inventories in the United States fell by 8.33 million barrels in the week ending June 12. Analysts had expected a 4.5 million draw. In the week prior, US crude oil inventories…</p><div class="story-meta">OilPrice.com · 3h ago</div></article></div></div></section><section class="section" id="section-watchlist"><div class="section-head"><h2>Personal Watchlist</h2></div><div class="watchlist"><div class="wl-row muted"><span class="wl-name">BHP Group</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">Rio Tinto</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">Fortescue</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">Woodside Energy</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">Pilbara Minerals</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">Commonwealth Bank</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">CSL Ltd</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">NVIDIA</span><span class="wl-unavail">unavailable</span></div><div class="wl-row muted"><span class="wl-name">Apple</span><span class="wl-unavail">unavailable</span></div></div></section></main>
+  <footer class="foot">
+    <p>Generated Wed 17 Jun, 10:22am AEST. Static snapshot — figures reflect the moment of generation.</p>
+    <p class="foot-fine">Market data via Yahoo Finance · News via public RSS feeds · Informational only, not financial advice.</p>
+  </footer>
+</div>
+</body>
+</html>
