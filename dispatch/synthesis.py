@@ -176,6 +176,14 @@ def _markets_theme(market_groups):
     return {"title": "Markets — the overnight picture", "body": body}
 
 
+def _clip(text, n):
+    """Trim to <= n chars on a word boundary with an ellipsis — never mid-word."""
+    text = (text or "").strip()
+    if len(text) <= n:
+        return text
+    return text[:n].rsplit(" ", 1)[0].rstrip(",.;:") + "…"
+
+
 def _category_themes(cfg, news_buckets, room):
     themes = []
     for c in cfg.NEWS_CATEGORIES:
@@ -188,7 +196,7 @@ def _category_themes(cfg, news_buckets, room):
         body = lead.summary or lead.title
         if len(items) > 1:
             body = (body + " Also developing: " + items[1].title).strip()
-        themes.append({"title": "%s — %s" % (c["title"], lead.title[:64]), "body": body})
+        themes.append({"title": "%s — %s" % (c["title"], _clip(lead.title, 72)), "body": body})
         room -= 1
     return themes
 
