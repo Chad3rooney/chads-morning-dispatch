@@ -11,9 +11,25 @@ a top-movers strip, and clear colour + arrows for every gain/loss.
 
 import html as _html
 
+from . import markets as _markets
+
 
 def esc(s):
     return _html.escape(str(s if s is not None else ""))
+
+
+def _live_attr(q):
+    """data-sym for client-side live refresh (skipped for non-CNBC quotes)."""
+    if getattr(q, "no_live", False) or not q.ok:
+        return ""
+    return ' data-sym="{}"'.format(esc(_markets.CNBC_MAP.get(q.symbol, q.symbol)))
+
+
+def _sensitive_mark(q):
+    if getattr(q, "sensitive", False):
+        return '<span class="sens" title="{}">&#42;</span>'.format(
+            esc(q.sensitive_note or "Price-sensitive announcement"))
+    return ""
 
 
 # --------------------------------------------------------------------------
@@ -81,15 +97,17 @@ def _quote_row(q):
         asof = '<span class="q-asof" title="Last available data — live source unreachable this run">as of {}</span>'.format(
             esc(q.as_of) if q.as_of else "earlier")
     return (
-        '<div class="row {dir}{stale}">'
-        '<div class="row-top"><span class="q-label">{label}{asof}</span>'
+        '<div class="row {dir}{stale}"{live} data-pct="{pctv}">'
+        '<div class="row-top"><span class="q-label">{label}{sens}{asof}</span>'
         '<span class="q-price">{price}</span></div>'
         '<div class="row-bot">{bar}'
         '<span class="q-chg">{arrow} {chg} <span class="q-pct">{pct}</span></span></div>'
         "</div>"
     ).format(
         dir=q.direction, stale=" is-stale" if getattr(q, "stale", False) else "",
-        label=esc(q.label), asof=asof, price=fmt_price(q), bar=_range_bar(q),
+        live=_live_attr(q), pctv=("%.4f" % q.pct) if q.ok else "",
+        label=esc(q.label), sens=_sensitive_mark(q), asof=asof,
+        price=fmt_price(q), bar=_range_bar(q),
         arrow=_ARROW[q.direction], chg=esc(fmt_change(q)), pct=esc(fmt_pct(q)),
     )
 
@@ -130,11 +148,14 @@ def market_snapshot(market_groups):
     down = sum(1 for q in all_q if q.direction == "down")
     breadth = ""
     if all_q:
-        breadth = '<span class="breadth"><span class="up">{u}↑</span> <span class="down">{d}↓</span></span>'.format(
+        breadth = '<span class="breadth" id="breadth"><span class="up">{u}↑</span> <span class="down">{d}↓</span></span>'.format(
             u=up, d=down)
+    live = ('<span class="live-ind" id="live-ind" hidden>'
+            '<span class="live-pulse"></span><span class="live-text">live</span></span>')
     cards = "".join(_market_group(g) for g in market_groups)
-    body = _movers_strip(market_groups) + '<div class="market-grid">{}</div>'.format(cards)
-    return _section("Market Snapshot", "section-markets", body, extra_head=breadth)
+    body = '<div class="movers-wrap" id="movers">{}</div>'.format(_movers_strip(market_groups)) \
+        + '<div class="market-grid">{}</div>'.format(cards)
+    return _section("Market Snapshot", "section-markets", body, extra_head=breadth + live)
 
 
 # --------------------------------------------------------------------------
@@ -231,18 +252,18 @@ def watchlist_section(quotes):
     rows = []
     for q in quotes:
         if q.ok:
-            name = esc(q.label)
+            name = esc(q.label) + _sensitive_mark(q)
             if getattr(q, "stale", False):
                 name += '<span class="q-asof" title="Last available data">as of {}</span>'.format(
                     esc(q.as_of) if q.as_of else "earlier")
             rows.append(
-                '<div class="wl-row {dir}{stale}">'
+                '<div class="wl-row {dir}{stale}"{live}>'
                 '<span class="wl-name">{label}</span>'
                 '<span class="wl-price">{price}</span>'
                 '<span class="wl-chg">{arrow} {chg}</span>'
                 '<span class="wl-pct">{pct}</span>'
                 "</div>".format(
-                    dir=q.direction, label=name, price=fmt_price(q),
+                    dir=q.direction, label=name, price=fmt_price(q), live=_live_attr(q),
                     arrow=_ARROW[q.direction], chg=esc(fmt_change(q)), pct=esc(fmt_pct(q)),
                     stale=" is-stale" if getattr(q, "stale", False) else "")
             )
@@ -255,6 +276,65 @@ def watchlist_section(quotes):
         "Personal Watchlist", "section-watchlist",
         '<div class="watchlist">{}</div>'.format("".join(rows)),
     )
+
+
+# --------------------------------------------------------------------------
+# Economy & Rates — recession gauge, policy rates, housing
+# --------------------------------------------------------------------------
+def _recession_card(rec):
+    if not rec:
+        return ""
+    return (
+        '<div class="eco-card recession {level}">'
+        '<div class="eco-head"><h3>Recession risk</h3>'
+        '<span class="rec-label">{label}</span></div>'
+        '<div class="gauge"><div class="gauge-track"></div>'
+        '<div class="gauge-marker" style="left:{gauge:.0f}%"></div></div>'
+        '<div class="gauge-scale"><span>Low</span><span>Elevated</span></div>'
+        '<p class="eco-detail">{detail}</p>'
+        '<p class="eco-fine">US 2Y {y2:.2f}% · US 10Y {y10:.2f}% · yield-curve signal</p>'
+        "</div>"
+    ).format(level=esc(rec["level"]), label=esc(rec["label"]), gauge=rec["gauge"],
+             detail=esc(rec["detail"]), y2=rec["y2"], y10=rec["y10"])
+
+
+def _policy_card(economy):
+    rates = (economy or {}).get("policy_rates") or []
+    if not rates:
+        return ""
+    items = "".join(
+        '<div class="rate-row"><span class="rate-name">{n}</span>'
+        '<span class="rate-val">{v}</span>'
+        '<span class="rate-note">{note}</span></div>'.format(
+            n=esc(r.get("name", "")), v=esc(r.get("value", "")), note=esc(r.get("note", "")))
+        for r in rates)
+    return ('<div class="eco-card"><div class="eco-head"><h3>Central bank rates</h3></div>'
+            '<div class="rate-list">{}</div></div>'.format(items))
+
+
+def _housing_card(economy):
+    h = (economy or {}).get("housing") or {}
+    rows = h.get("rows") or []
+    if not rows:
+        return ""
+    items = "".join(
+        '<div class="rate-row"><span class="rate-name">{n}</span>'
+        '<span class="rate-val">{v}</span>'
+        '<span class="rate-note">{c}</span></div>'.format(
+            n=esc(r.get("name", "")), v=esc(r.get("value", "")), c=esc(r.get("change", "")))
+        for r in rows)
+    asat = '<span class="card-note">as at {}</span>'.format(esc(h.get("as_at", ""))) if h.get("as_at") else ""
+    return ('<div class="eco-card"><div class="eco-head"><h3>AU housing</h3>{asat}</div>'
+            '<div class="rate-list">{items}</div></div>'.format(asat=asat, items=items))
+
+
+def economy_section(recession, economy):
+    cards = "".join(c for c in (
+        _recession_card(recession), _policy_card(economy), _housing_card(economy)) if c)
+    if not cards:
+        return ""
+    return _section("Economy & Rates", "section-economy",
+                    '<div class="eco-grid">{}</div>'.format(cards))
 
 
 # --------------------------------------------------------------------------
@@ -304,13 +384,14 @@ def render_page(ctx):
         market_snapshot(ctx["market_groups"]),
         themes_section(ctx["synth"]),
         watch_section(ctx["synth"]),
+        economy_section(ctx.get("recession"), ctx.get("economy")),
         news_section(ctx["news_buckets"], ctx["categories"]),
         watchlist_section(ctx["watchlist"]),
     ]
     nav_meta = [
         ("section-markets", "Markets"), ("section-themes", "Overnight"),
-        ("section-watch", "Watch"), ("section-news", "News"),
-        ("section-watchlist", "Watchlist"),
+        ("section-watch", "Watch"), ("section-economy", "Economy"),
+        ("section-news", "News"), ("section-watchlist", "Watchlist"),
     ]
     present = {s.split('id="', 1)[1].split('"', 1)[0] for s in sections if s}
     nav_links = "".join(
@@ -353,6 +434,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <nav class="topnav">
   <a class="nav-brand" href="#top">{short}</a>
   <div class="nav-links">{nav_links}</div>
+  <a class="nav-game" href="minesweeper.html" title="Warm the brain up">&#9819; Minesweeper</a>
   <button id="theme-btn" class="theme-btn" type="button" aria-label="Toggle light or dark theme">
     <span class="t-icon"></span><span class="t-label"></span>
   </button>
@@ -430,6 +512,90 @@ SCRIPTS = """<script>
     });
   }
   paint();
+
+  // --- Live prices (progressive enhancement) -------------------------------
+  // The page ships with cached values so it loads instantly, then refreshes
+  // from CNBC's CORS-enabled quote API every minute. When a market is shut,
+  // CNBC's "last" is that market's previous close — so you always see the most
+  // recent real result, live whenever you open the page.
+  var CNBC = 'https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?requestMethod=itv&fund=1&exthrs=1&output=json&symbols=';
+  function dec(v){ v = Math.abs(v); return v < 2 ? 4 : (v < 20 ? 3 : 2); }
+  function fnum(v, ref){ var d = dec(ref==null?v:ref); return v.toLocaleString('en-AU',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+  function fchg(v, ref){ return (v>=0?'+':'') + fnum(v, ref); }
+  function fpct(v){ return (v>=0?'+':'') + v.toFixed(2) + '%'; }
+  function parseNum(s){ if(s==null) return null; var n=parseFloat(String(s).replace(/[,%]/g,'')); return isNaN(n)?null:n; }
+
+  function flash(el, dir){
+    var c = dir==='up'?'flash-up':(dir==='down'?'flash-down':null);
+    if(!c) return; el.classList.add(c); setTimeout(function(){ el.classList.remove(c); }, 800);
+  }
+  function applyRow(el, last, chg, hi, lo){
+    if(last==null) return;
+    if(chg==null) chg = 0;                       // CNBC "UNCH"
+    var prev = last - chg, pct = prev? chg/prev*100 : 0;
+    var dir = chg>0?'up':(chg<0?'down':'flat'), arrow = dir==='up'?'▲':(dir==='down'?'▼':'•');
+    var wl = el.classList.contains('wl-row');
+    el.classList.remove('up','down','flat','is-stale'); el.classList.add(dir);
+    el.setAttribute('data-pct', pct.toFixed(4));
+    var pe = el.querySelector(wl?'.wl-price':'.q-price');
+    if(pe){ var old=pe.textContent; var nv=fnum(last,last); if(old!==nv){ pe.textContent=nv; flash(el,dir);} }
+    if(wl){
+      var c=el.querySelector('.wl-chg'); if(c) c.textContent=arrow+' '+fchg(chg,last);
+      var p=el.querySelector('.wl-pct'); if(p) p.textContent=fpct(pct);
+    } else {
+      var c2=el.querySelector('.q-chg'); if(c2) c2.innerHTML=arrow+' '+fchg(chg,last)+' <span class="q-pct">'+fpct(pct)+'</span>';
+      if(hi!=null && lo!=null && hi>lo){
+        var dot=el.querySelector('.range-dot'), rg=el.querySelector('.range');
+        if(dot) dot.style.left=Math.max(0,Math.min(100,(last-lo)/(hi-lo)*100)).toFixed(1)+'%';
+        if(rg){ rg.classList.remove('up','down','flat','range--none'); rg.classList.add(dir); }
+      }
+      var as=el.querySelector('.q-asof'); if(as) as.remove();
+    }
+  }
+  function refresh(){
+    var up=0, down=0, movers=[];
+    document.querySelectorAll('.market-grid .row').forEach(function(r){
+      var pct=parseFloat(r.getAttribute('data-pct')); if(isNaN(pct)) return;
+      if(r.classList.contains('up')) up++; else if(r.classList.contains('down')) down++;
+      var lab=r.querySelector('.q-label'); lab = lab? (lab.childNodes[0]?lab.childNodes[0].textContent:lab.textContent).trim():'';
+      movers.push({label:lab, pct:pct, dir:r.classList.contains('up')?'up':(r.classList.contains('down')?'down':'flat')});
+    });
+    var b=document.getElementById('breadth'); if(b) b.innerHTML='<span class="up">'+up+'\\u2191</span> <span class="down">'+down+'\\u2193</span>';
+    movers.sort(function(a,b){return Math.abs(b.pct)-Math.abs(a.pct);});
+    var top=movers.filter(function(m){return Math.abs(m.pct)>=0.05;}).slice(0,6);
+    var mv=document.getElementById('movers');
+    if(mv && top.length){
+      mv.innerHTML='<div class="movers"><span class="movers-label">Big movers</span>'+top.map(function(m){
+        var a=m.dir==='up'?'▲':(m.dir==='down'?'▼':'•');
+        return '<span class="mover '+m.dir+'"><span class="mover-name">'+m.label+'</span><span class="mover-pct">'+a+' '+fpct(m.pct)+'</span></span>';
+      }).join('')+'</div>';
+    }
+  }
+  function chunks(arr,n){ var o=[]; for(var i=0;i<arr.length;i+=n) o.push(arr.slice(i,i+n)); return o; }
+  function updateQuotes(){
+    var els=[].slice.call(document.querySelectorAll('[data-sym]'));
+    if(!els.length || !window.fetch) return;
+    var symMap={}; els.forEach(function(e){ (symMap[e.getAttribute('data-sym')]=symMap[e.getAttribute('data-sym')]||[]).push(e); });
+    var syms=Object.keys(symMap);
+    Promise.all(chunks(syms,40).map(function(ch){
+      return fetch(CNBC+ch.join('%7C')).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+    })).then(function(results){
+      var got=0;
+      results.forEach(function(d){
+        var list=d&&d.FormattedQuoteResult&&d.FormattedQuoteResult.FormattedQuote;
+        if(!list) return;
+        list.forEach(function(q){
+          if(String(q.code)!=='0') return;
+          var els=symMap[q.symbol]; if(!els) return; got++;
+          els.forEach(function(el){ applyRow(el, parseNum(q.last), parseNum(q.change), parseNum(q.high), parseNum(q.low)); });
+        });
+      });
+      if(got){ refresh(); var ind=document.getElementById('live-ind');
+        if(ind){ ind.hidden=false; var t=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); ind.querySelector('.live-text').textContent='live · '+t; } }
+    });
+  }
+  updateQuotes();
+  setInterval(updateQuotes, 60000);
 })();
 </script>"""
 
@@ -486,6 +652,10 @@ a:hover{text-decoration:underline}
   transition:color .2s, border-color .2s}
 .theme-btn:hover{color:var(--ink); border-color:var(--ink-faint)}
 .theme-btn .t-icon{font-size:13px; line-height:1}
+.nav-game{flex:none; font-size:12.5px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--kicker)));
+  border-radius:999px; padding:6px 13px; white-space:nowrap; box-shadow:var(--shadow)}
+.nav-game:hover{text-decoration:none; filter:brightness(1.08); transform:translateY(-1px)}
 
 /* Masthead */
 .masthead{padding:24px 0 22px; border-bottom:1px solid var(--line); margin-bottom:26px}
@@ -612,12 +782,60 @@ a:hover{text-decoration:underline}
 .wl-row.flat .wl-chg,.wl-row.flat .wl-pct{color:var(--flat)}
 .wl-row.muted{grid-template-columns:1fr auto}
 
+/* Live indicator + price flash */
+.live-ind{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--up)}
+.live-pulse{width:8px; height:8px; border-radius:50%; background:var(--up); position:relative}
+.live-pulse::after{content:""; position:absolute; inset:0; border-radius:50%; background:var(--up);
+  animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.7} 100%{transform:scale(3);opacity:0}}
+@keyframes flashUp{0%{background:color-mix(in srgb,var(--up) 26%,transparent)} 100%{background:transparent}}
+@keyframes flashDown{0%{background:color-mix(in srgb,var(--down) 26%,transparent)} 100%{background:transparent}}
+.row.flash-up,.wl-row.flash-up{animation:flashUp .8s ease-out}
+.row.flash-down,.wl-row.flash-down{animation:flashDown .8s ease-out}
+.q-price,.wl-price,.q-chg,.wl-chg,.wl-pct{transition:color .25s}
+
+/* Price-sensitive announcement flag */
+.sens{color:var(--down); font-weight:800; margin-left:4px; cursor:help; font-size:15px; vertical-align:top}
+
+/* Economy & Rates */
+.eco-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+.eco-card{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  padding:16px 16px 14px; box-shadow:var(--shadow)}
+.eco-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px}
+.eco-head h3{font-size:14.5px; margin:0; font-weight:730}
+.rec-label{font-size:12px; font-weight:800; padding:2px 10px; border-radius:999px}
+.recession.low .rec-label{color:var(--up); background:color-mix(in srgb,var(--up) 16%,transparent)}
+.recession.watch .rec-label{color:var(--kicker); background:color-mix(in srgb,var(--kicker) 16%,transparent)}
+.recession.moderate .rec-label{color:#d08a2c; background:color-mix(in srgb,#d08a2c 16%,transparent)}
+.recession.high .rec-label{color:var(--down); background:color-mix(in srgb,var(--down) 16%,transparent)}
+.gauge{position:relative; height:10px; border-radius:6px; margin:6px 0 4px;
+  background:linear-gradient(90deg,var(--up) 0%,#e0b94e 52%,var(--down) 100%)}
+.gauge-marker{position:absolute; top:50%; width:4px; height:18px; border-radius:3px;
+  background:var(--ink); transform:translate(-50%,-50%); box-shadow:0 0 0 2px var(--panel)}
+.gauge-scale{display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-faint); font-weight:600}
+.eco-detail{margin:10px 0 6px; font-size:13.5px; color:var(--ink-soft); line-height:1.5}
+.eco-fine{margin:0; font-size:11px; color:var(--ink-faint); font-variant-numeric:tabular-nums}
+.rate-list{display:flex; flex-direction:column}
+.rate-row{display:grid; grid-template-columns:1fr auto; gap:4px 12px; padding:9px 0; border-top:1px solid var(--line)}
+.rate-row:first-child{border-top:none}
+.rate-name{font-size:14px; font-weight:600; color:var(--ink)}
+.rate-val{font-size:14.5px; font-weight:730; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink)}
+.rate-note{grid-column:1/-1; font-size:11.5px; color:var(--ink-faint); margin-top:-2px}
+
 /* Footer */
 .foot{margin-top:52px; padding-top:22px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:12.5px}
 .foot-nav{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
 .foot-nav a{font-size:12.5px; font-weight:600; color:var(--ink-soft)}
 .foot p{margin:0 0 5px}
 .foot-fine{font-size:11.5px}
+
+/* Card hover lift + fade-in */
+.market-card,.eco-card,.watch-list li{transition:transform .18s ease, box-shadow .18s ease}
+.market-card:hover,.eco-card:hover{transform:translateY(-2px)}
+main>.section{animation:rise .5s ease both}
+@keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 
 @media (max-width:560px){
   .wrap{padding:20px 15px 48px}
@@ -632,3 +850,138 @@ a:hover{text-decoration:underline}
   body{background:#fff; color:#000}
 }
 """)
+
+
+# --------------------------------------------------------------------------
+# Minesweeper — a standalone brain-warmer page (18x18, 20 mines)
+# --------------------------------------------------------------------------
+def minesweeper_page(title):
+    """Self-contained Minesweeper page sharing the dispatch's palette + theme."""
+    return _MINESWEEPER.replace("{{TITLE}}", esc(title))
+
+
+_MINESWEEPER = ("""<!DOCTYPE html>
+<html lang="en-AU"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="color-scheme" content="light dark">
+<title>Minesweeper — {{TITLE}}</title>
+<script>try{var t=localStorage.getItem('mcd-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+:root{ --bg:#f4f2ec; --panel:#fffdf9; --panel-2:#efece4; --ink:#1b1c21; --ink-soft:#52545d;
+  --ink-faint:#8b8d97; --line:#ddd7ca; --accent:#2f6f5e; --kicker:#9a6a3c; --down:#c0392b;
+  --shadow:0 1px 2px rgba(40,35,25,.06),0 8px 24px rgba(40,35,25,.05);
+  --c1:#2f6f5e;--c2:#9a6a3c;--c3:#c0392b;--c4:#5a4db1;--c5:#b1592f;--c6:#1f8a8a;--c7:#444;--c8:#888; }
+"""
+"""[data-theme="dark"]{ --bg:#121317; --panel:#1b1d24; --panel-2:#21242c; --ink:#eef0f4; --ink-soft:#aab0bd;
+  --ink-faint:#787d89; --line:#2a2d36; --accent:#5cb9a0; --kicker:#d2a36c; --down:#f06d5d;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px rgba(0,0,0,.3);
+  --c1:#5cb9a0;--c2:#d2a36c;--c3:#f06d5d;--c4:#9b8cf0;--c5:#e0945c;--c6:#5ad0d0;--c7:#cfd3da;--c8:#9aa0ab; }
+@media (prefers-color-scheme:dark){:root:not([data-theme]){ --bg:#121317; --panel:#1b1d24; --panel-2:#21242c;
+  --ink:#eef0f4; --ink-soft:#aab0bd; --ink-faint:#787d89; --line:#2a2d36; --accent:#5cb9a0; --kicker:#d2a36c; --down:#f06d5d;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px rgba(0,0,0,.3);
+  --c1:#5cb9a0;--c2:#d2a36c;--c3:#f06d5d;--c4:#9b8cf0;--c5:#e0945c;--c6:#5ad0d0;--c7:#cfd3da;--c8:#9aa0ab; }}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%; display:flex; flex-direction:column; align-items:center; min-height:100vh}
+.bar{width:100%; max-width:560px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px}
+.back{font-size:13px; font-weight:700; color:var(--ink-soft); text-decoration:none}
+.back:hover{color:var(--accent)}
+.title{font-size:13px; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:var(--kicker)}
+.hud{width:100%; max-width:560px; display:flex; align-items:center; justify-content:space-between; gap:10px; padding:0 16px 12px}
+.stat{display:flex; align-items:center; gap:7px; font-variant-numeric:tabular-nums; font-weight:800; font-size:18px;
+  background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:8px 14px; box-shadow:var(--shadow)}
+.stat small{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint)}
+.btn{cursor:pointer; font:inherit; font-weight:700; font-size:14px; color:var(--ink); background:var(--panel);
+  border:1px solid var(--line); border-radius:12px; padding:8px 14px; box-shadow:var(--shadow)}
+.btn:hover{border-color:var(--ink-faint)}
+.btn.on{background:var(--accent); color:#fff; border-color:transparent}
+.wrap{padding:0 12px 26px}
+#board{display:grid; gap:3px; background:var(--line); padding:3px; border-radius:12px; box-shadow:var(--shadow);
+  touch-action:manipulation; user-select:none; -webkit-user-select:none}
+.cell{width:min(7.6vw,30px); height:min(7.6vw,30px); display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:min(4.4vw,16px); border-radius:5px; background:var(--panel-2); cursor:pointer;
+  font-variant-numeric:tabular-nums}
+.cell.rev{background:var(--panel); cursor:default}
+.cell.flag{background:var(--panel-2)}
+.cell.mine{background:var(--down); color:#fff}
+.cell.boom{background:var(--down); color:#fff; box-shadow:0 0 0 2px var(--down)}
+.c1{color:var(--c1)}.c2{color:var(--c2)}.c3{color:var(--c3)}.c4{color:var(--c4)}
+.c5{color:var(--c5)}.c6{color:var(--c6)}.c7{color:var(--c7)}.c8{color:var(--c8)}
+.msg{height:24px; margin:14px 0 0; font-weight:800; font-size:16px}
+.msg.win{color:var(--accent)} .msg.lose{color:var(--down)}
+</style></head>
+<body>
+<div class="bar"><a class="back" href="index.html">&larr; Back to Dispatch</a>
+  <span class="title">Brain Warmer</span>
+  <button class="btn" id="theme" type="button">Theme</button></div>
+<div class="hud">
+  <span class="stat"><small>Mines</small> <span id="mines">20</span></span>
+  <button class="btn" id="restart" type="button">&#8635; New game</button>
+  <button class="btn" id="flagmode" type="button">&#9873; Flag</button>
+  <span class="stat"><small>Time</small> <span id="time">0</span></span>
+</div>
+<div class="wrap"><div id="board"></div><div class="msg" id="msg"></div></div>
+<script>
+(function(){
+  var N=18, MINES=20;
+  var board=document.getElementById('board'), msg=document.getElementById('msg');
+  var minesEl=document.getElementById('mines'), timeEl=document.getElementById('time');
+  var cells=[], mine=[], adj=[], rev=[], flag=[], started=false, over=false, t=0, timer=null, flagMode=false;
+  board.style.gridTemplateColumns='repeat('+N+',1fr)';
+  function idx(r,c){return r*N+c;}
+  function neigh(i){var r=(i/N)|0,c=i%N,o=[];for(var dr=-1;dr<=1;dr++)for(var dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;var nr=r+dr,nc=c+dc;if(nr>=0&&nr<N&&nc>=0&&nc<N)o.push(idx(nr,nc));}return o;}
+  function build(){
+    board.innerHTML=''; cells=[]; mine=[]; adj=[]; rev=[]; flag=[];
+    for(var i=0;i<N*N;i++){mine[i]=false;adj[i]=0;rev[i]=false;flag[i]=false;
+      var d=document.createElement('div'); d.className='cell'; d.dataset.i=i; board.appendChild(d); cells[i]=d;}
+    started=false; over=false; t=0; timeEl.textContent='0'; minesEl.textContent=MINES; msg.textContent=''; msg.className='msg';
+    if(timer){clearInterval(timer);timer=null;}
+  }
+  function place(safe){
+    var banned={}; banned[safe]=1; neigh(safe).forEach(function(x){banned[x]=1;});
+    var pool=[]; for(var i=0;i<N*N;i++) if(!banned[i]) pool.push(i);
+    for(var m=0;m<MINES;m++){var k=Math.floor(Math.random()*pool.length); mine[pool[k]]=true; pool.splice(k,1);}
+    for(var i2=0;i2<N*N;i2++){ if(mine[i2])continue; var cnt=0; neigh(i2).forEach(function(x){if(mine[x])cnt++;}); adj[i2]=cnt; }
+  }
+  function startTimer(){ timer=setInterval(function(){t++; timeEl.textContent=t;},1000); }
+  function reveal(i){
+    if(rev[i]||flag[i]) return;
+    rev[i]=true; var d=cells[i]; d.classList.add('rev');
+    if(mine[i]){ d.classList.add('boom'); d.textContent='\\u2737'; return lose(); }
+    if(adj[i]>0){ d.textContent=adj[i]; d.classList.add('c'+adj[i]); }
+    else { neigh(i).forEach(function(x){ if(!rev[x]) reveal(x); }); }
+  }
+  function flagCount(){var n=0;for(var i=0;i<N*N;i++)if(flag[i])n++;return n;}
+  function toggleFlag(i){ if(rev[i]) return; flag[i]=!flag[i]; var d=cells[i];
+    d.classList.toggle('flag',flag[i]); d.textContent=flag[i]?'\\u2691':''; minesEl.textContent=MINES-flagCount(); }
+  function lose(){ over=true; clearInterval(timer);
+    for(var i=0;i<N*N;i++){ if(mine[i]&&!flag[i]){cells[i].classList.add('rev','mine'); if(!cells[i].textContent)cells[i].textContent='\\u2737';} }
+    msg.textContent='Boom. New game?'; msg.className='msg lose'; }
+  function checkWin(){ var safe=0; for(var i=0;i<N*N;i++) if(!mine[i]&&rev[i]) safe++;
+    if(safe===N*N-MINES){ over=true; clearInterval(timer); msg.textContent='Cleared in '+t+'s. Nice.'; msg.className='msg win'; } }
+  function tap(i){
+    if(over) return;
+    if(!started){ started=true; place(i); startTimer(); }
+    if(flagMode){ toggleFlag(i); return; }
+    if(flag[i]) return;
+    reveal(i); if(!over) checkWin();
+  }
+  board.addEventListener('click',function(e){var c=e.target.closest('.cell'); if(c) tap(+c.dataset.i);});
+  board.addEventListener('contextmenu',function(e){e.preventDefault(); var c=e.target.closest('.cell'); if(c&&!over){ if(!started){started=true;place(+c.dataset.i);startTimer();} toggleFlag(+c.dataset.i);} });
+  // long-press to flag on touch
+  var lp=null;
+  board.addEventListener('touchstart',function(e){var c=e.target.closest('.cell'); if(!c)return; lp=setTimeout(function(){lp=null; if(!over){ if(!started){started=true;place(+c.dataset.i);startTimer();} toggleFlag(+c.dataset.i);}},420);},{passive:true});
+  board.addEventListener('touchend',function(){ if(lp){clearTimeout(lp);lp=null;} });
+  document.getElementById('restart').addEventListener('click',build);
+  document.getElementById('flagmode').addEventListener('click',function(){ flagMode=!flagMode; this.classList.toggle('on',flagMode); });
+  document.getElementById('theme').addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    var eff=cur||(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+    var next=eff==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',next);
+    try{localStorage.setItem('mcd-theme',next);}catch(e){}
+  });
+  build();
+})();
+</script>
+</body></html>""")
