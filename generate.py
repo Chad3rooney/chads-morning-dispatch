@@ -19,7 +19,7 @@ import sys
 import traceback
 
 from dispatch import config as cfg
-from dispatch import markets, news, synthesis, render, timeutil, macro
+from dispatch import markets, news, synthesis, render, timeutil, macro, weather
 
 
 def _greeting(now_dt, owner):
@@ -57,12 +57,21 @@ def build(out_dir):
     watchlist = _safe(
         "watchlist", lambda: markets.fetch_quotes(cfg.WATCHLIST, timeout=timeout), [])
 
+    print("- Markets: mining watch")
+    mw_cfg = cfg.__dict__.get("MINING_WATCH", [])
+    mw_quotes = _safe("mining_watch", lambda: markets.fetch_quotes(
+        [(s, l) for s, l, _ in mw_cfg], timeout=timeout), [])
+
     # Fill any symbol that failed this run from the last-known-good cache (clearly
     # flagged as stale), then persist the fresh values for next time.
-    all_quote_lists = [g["quotes"] for g in market_groups] + [watchlist]
+    all_quote_lists = [g["quotes"] for g in market_groups] + [watchlist, mw_quotes]
     for quotes in all_quote_lists:
         markets.apply_cache(quotes, market_cache)
     markets.save_cache(cache_path, all_quote_lists)
+
+    # Flag any sovereign-bond yield sitting at/above its danger threshold.
+    for g in market_groups:
+        markets.apply_bond_danger(g["quotes"], cfg.__dict__.get("BOND_DANGER", {}))
 
     flat = [q for quotes in all_quote_lists for q in quotes]
     live = sum(1 for q in flat if q.ok and not q.stale)
@@ -73,14 +82,24 @@ def build(out_dir):
     # Recession signal from the yield curve (no extra source).
     recession = _safe("recession", lambda: macro.recession_signal(flat), None)
 
-    # Price-sensitive ASX announcement flags on the watchlist.
+    # Local weather for the Port Stephens brief (also refreshes client-side).
+    wx = None
+    if cfg.__dict__.get("LOCAL"):
+        print("- Local weather")
+        wx = _safe("weather", lambda: weather.fetch_weather(
+            cfg.LOCAL["lat"], cfg.LOCAL["lon"], timeout=timeout), None)
+
+    # Price-sensitive ASX announcement flags (watchlist + mining watch).
     if cfg.__dict__.get("ANNOUNCEMENTS", {}).get("enabled"):
         print("- ASX announcements")
+        asx_syms = [s for s, _ in cfg.WATCHLIST] + [s for s, _, _ in mw_cfg]
         flags = _safe("announcements", lambda: markets.fetch_announcements(
-            [s for s, _ in cfg.WATCHLIST],
-            cfg.ANNOUNCEMENTS.get("lookback_hours", 48), timeout=timeout), {})
+            asx_syms, cfg.ANNOUNCEMENTS.get("lookback_hours", 48), timeout=timeout), {})
         markets.apply_announcements(watchlist, flags)
-        print("  %d price-sensitive flag(s)" % sum(1 for q in watchlist if q.sensitive))
+        markets.apply_announcements(mw_quotes, flags)
+        print("  %d price-sensitive flag(s)" % sum(1 for q in flat if q.sensitive))
+
+    mining_watch = list(zip(mw_quotes, [r for _, _, r in mw_cfg]))
 
     print("- News: %d feeds" % len(cfg.NEWS_FEEDS))
     news_buckets = _safe("news", lambda: news.gather(
@@ -88,20 +107,29 @@ def build(out_dir):
         lookback_hours=cfg.SITE.get("news_lookback_hours", 30),
         per_category=cfg.SITE.get("max_news_per_category", 6),
         timeout=timeout,
+        exclude_business=cfg.__dict__.get("NEWS_FILTER", {}).get("exclude_business"),
     ), {})
     n_stories = sum(len(v) for v in news_buckets.values())
     print("  %d stories across %d categories" % (n_stories, len(news_buckets)))
+
+    highlights = _safe("highlights", lambda: news.pick_highlights(
+        news_buckets, cfg.__dict__.get("NEWS_FILTER", {}).get("highlight_keywords"), 4), [])
 
     print("- Synthesis")
     synth = _safe("synthesis", lambda: synthesis.synthesize(
         cfg, market_groups, news_buckets, date_full),
         {"mood": "", "themes": [], "watch": [], "source": "fallback"})
+    # Merge Chad's personal "what to watch" items ahead of the auto ones.
+    personal = cfg.__dict__.get("WATCH_PERSONAL", [])
+    if personal:
+        synth["watch"] = (personal + synth.get("watch", []))[:max(6, len(personal))]
     print("  source=%s, %d themes, %d watch items" % (
         synth.get("source"), len(synth.get("themes", [])), len(synth.get("watch", []))))
 
     ctx = {
         "title": cfg.SITE["title"],
         "tagline": cfg.SITE["tagline"],
+        "owner": cfg.SITE["owner_name"],
         "greeting": _greeting(now_dt, cfg.SITE["owner_name"]),
         "date_full": date_full,
         "stamp": stamp,
@@ -111,6 +139,12 @@ def build(out_dir):
         "news_buckets": news_buckets,
         "categories": cfg.NEWS_CATEGORIES,
         "watchlist": watchlist,
+        "mining_watch": mining_watch,
+        "highlights": highlights,
+        "weather": wx,
+        "local": cfg.__dict__.get("LOCAL"),
+        "focus": cfg.__dict__.get("TODAYS_FOCUS"),
+        "prado": cfg.__dict__.get("PRADO"),
         "recession": recession,
         "economy": cfg.__dict__.get("ECONOMY"),
     }

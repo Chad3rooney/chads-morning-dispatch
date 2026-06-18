@@ -284,3 +284,107 @@ ECONOMY = {
         ],
     },
 }
+
+# ---------------------------------------------------------------------------
+# LOCAL — the Port Stephens Brief (top section). Weather is LIVE (Open-Meteo);
+# the fire danger rating has no clean free feed, so set it here (updates rarely
+# — winter sits at Low–Moderate for weeks). Coords are Nelson Bay.
+# ---------------------------------------------------------------------------
+LOCAL = {
+    "place": "Nelson Bay · Port Stephens",
+    "lat": -32.72, "lon": 152.15,
+    "fire_district": "Greater Hunter",
+    "fire_rating": "Moderate",            # Moderate | High | Extreme | Catastrophic | No Rating
+    "fire_advice": "Plan and prepare.",
+    "note": "Good conditions for outdoor work and Prado jobs today.",
+}
+
+# ---------------------------------------------------------------------------
+# TODAYS_FOCUS — a short personal intention + a rotating quote. Edit freely;
+# the quote rotates by day so it changes daily.
+# ---------------------------------------------------------------------------
+TODAYS_FOCUS = {
+    "intention": "Two solid HSC study blocks, gym, and an hour on the Prado.",
+    "priorities": [
+        "HSC: 2× 50-min blocks (Maths + Physics), phone in the other room",
+        "Career: 20 min comparing Mining Eng entry vs RAN (gap year / ADFA)",
+        "Body + build: gym session, then diff-breather job on the Prado",
+    ],
+    "quotes": [
+        ("“Discipline equals freedom.”", "Jocko Willink"),
+        ("“The mine is only as good as the people who run it.”", "Mining proverb"),
+        ("“Amateurs talk strategy; professionals talk logistics.”", "Gen. Omar Bradley"),
+        ("“Hard times create strong men.”", "G. Michael Hopf"),
+        ("“The best time to plant a tree was 20 years ago. The second best is now.”", "Proverb"),
+        ("“Fortune favours the prepared mind.”", "Louis Pasteur"),
+        ("“Dig where the gold is — but only if you need the money.”", "Robert Kiyosaki"),
+    ],
+}
+
+# ---------------------------------------------------------------------------
+# MINING_WATCH — Chad's specific junior/resource names, with a one-line reason.
+# Symbols use the same notation as WATCHLIST (CNBC/ASX).
+# ---------------------------------------------------------------------------
+MINING_WATCH = [
+    ("TSO.AX", "Tesoro Gold",      "Kun gold project, Chile — drilling + gold leverage"),
+    ("SHN.AX", "Sunshine Metals",  "Qld copper-gold-zinc; resource growth story"),
+    ("BHL.AX", "Black Horse Min.", "Iron ore / exploration — early-stage spec"),
+    ("TMS.AX", "Tennant Minerals", "NT copper-gold (Bluebird) — high-grade hits"),
+    ("ORI.AX", "Orica",            "Explosives bellwether — reads mining activity"),
+    ("BHP.AX", "BHP Group",        "Iron ore + copper anchor for the sector"),
+    ("RIO.AX", "Rio Tinto",        "Iron ore majors / Pilbara + Simandou"),
+]
+
+# ---------------------------------------------------------------------------
+# PRADO — the 2007 Prado 120 build pulse (light personal section).
+# ---------------------------------------------------------------------------
+PRADO = {
+    "status": "Daily-driver spec, mild touring setup. Running well.",
+    "next": "285/70R17 KO3s + speedo recalibration; then diff breathers.",
+    "on_order": "Diff-breather kit · sway-bar disconnects (researching exhaust).",
+}
+
+# ---------------------------------------------------------------------------
+# WATCH_PERSONAL — personal items merged into "What to Watch Today" alongside
+# the auto-generated market/news items.
+# ---------------------------------------------------------------------------
+WATCH_PERSONAL = [
+    {"title": "HSC study blocks", "detail": "Lock in two deep-work sessions before midday."},
+    {"title": "RFS availability", "detail": "Check the pager / brigade roster for the week."},
+]
+
+# ---------------------------------------------------------------------------
+# BOND_DANGER — yield thresholds (%). A sovereign-bond row turns red with a ⚠
+# when its yield is at/above its danger level (a rough fiscal-stress signal).
+# ---------------------------------------------------------------------------
+BOND_DANGER = {
+    "^TNX": 4.80,     # US 10Y
+    "US2Y": 4.80,     # US 2Y
+    "US30Y": 5.00,    # US 30Y
+    "AU10Y": 5.00,    # Australia 10Y
+    "AU2Y": 4.80,     # Australia 2Y
+    "GB10Y-GB": 5.00, # UK 10Y
+    "JP10Y-JP": 2.50, # Japan 10Y (low base; >2.5% is notable stress)
+    "DE10Y-DE": 3.50, # Germany 10Y
+}
+
+# ---------------------------------------------------------------------------
+# NEWS_FILTER — keep Business & Markets pure macro/markets.
+#   exclude: drop stories whose title contains any of these (personal-finance
+#            "agony aunt" noise). Applied to the business category.
+#   highlight: stories matching these (any category) feed "Chad's Highlights",
+#            ranked for relevance to mining juniors, resources, energy & career.
+# ---------------------------------------------------------------------------
+NEWS_FILTER = {
+    "exclude_business": [
+        "inheritance", "my husband", "my wife", "retirement", "i'm 60", "i am 60",
+        "i'm 65", "nest egg", "aged care", "centrelink", "pension", "should i sell my",
+        "agony", "ask the expert", "money problem", "dear ", "superannuation balance",
+    ],
+    "highlight_keywords": [
+        "mining", "miner", "lithium", "copper", "gold", "iron ore", "nickel", "uranium",
+        "rare earth", "cobalt", "drill", "exploration", "BHP", "Rio Tinto", "Fortescue",
+        "resources", "commodity", "commodities", "oil", "gas", "energy", "OPEC",
+        "ASX", "critical minerals", "Pilbara", "RBA", "Fed", "tariff", "China",
+    ],
+}
