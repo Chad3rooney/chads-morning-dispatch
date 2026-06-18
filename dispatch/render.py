@@ -96,17 +96,26 @@ def _quote_row(q):
     if getattr(q, "stale", False):
         asof = '<span class="q-asof" title="Last available data — live source unreachable this run">as of {}</span>'.format(
             esc(q.as_of) if q.as_of else "earlier")
+    danger = ""
+    danger_attr = ""
+    if getattr(q, "danger_at", None) is not None:
+        # Threshold exists: emit the data attr + a ⚠ marker (CSS shows it only
+        # when the row carries .danger, so the live JS can toggle it).
+        danger_attr = ' data-danger="{:.4f}"'.format(q.danger_at)
+        danger = '<span class="warn" title="Yield at/above danger level ({:.2f}%) — fiscal-stress signal">&#9888;</span>'.format(
+            q.danger_at)
     return (
-        '<div class="row {dir}{stale}"{live} data-pct="{pctv}">'
-        '<div class="row-top"><span class="q-label">{label}{sens}{asof}</span>'
+        '<div class="row {dir}{stale}{dgr}"{live}{dattr} data-pct="{pctv}">'
+        '<div class="row-top"><span class="q-label">{label}{sens}{danger}{asof}</span>'
         '<span class="q-price">{price}</span></div>'
         '<div class="row-bot">{bar}'
         '<span class="q-chg">{arrow} {chg} <span class="q-pct">{pct}</span></span></div>'
         "</div>"
     ).format(
         dir=q.direction, stale=" is-stale" if getattr(q, "stale", False) else "",
-        live=_live_attr(q), pctv=("%.4f" % q.pct) if q.ok else "",
-        label=esc(q.label), sens=_sensitive_mark(q), asof=asof,
+        dgr=" danger" if getattr(q, "danger", False) else "",
+        live=_live_attr(q), dattr=danger_attr, pctv=("%.4f" % q.pct) if q.ok else "",
+        label=esc(q.label), sens=_sensitive_mark(q), danger=danger, asof=asof,
         price=fmt_price(q), bar=_range_bar(q),
         arrow=_ARROW[q.direction], chg=esc(fmt_change(q)), pct=esc(fmt_pct(q)),
     )
@@ -338,6 +347,140 @@ def economy_section(recession, economy):
 
 
 # --------------------------------------------------------------------------
+# Personalised sections
+# --------------------------------------------------------------------------
+def todays_focus_section(focus, now_dt):
+    if not focus:
+        return ""
+    parts = []
+    if focus.get("intention"):
+        parts.append('<p class="focus-intent">{}</p>'.format(esc(focus["intention"])))
+    pris = focus.get("priorities") or []
+    if pris:
+        lis = "".join('<li>{}</li>'.format(esc(p)) for p in pris)
+        parts.append('<ol class="focus-list">{}</ol>'.format(lis))
+    quotes = focus.get("quotes") or []
+    if quotes:
+        q, who = quotes[now_dt.timetuple().tm_yday % len(quotes)]
+        parts.append('<p class="focus-quote">{}<span class="focus-who">— {}</span></p>'.format(
+            esc(q), esc(who)))
+    return _section("Today's Focus", "section-focus", "".join(parts))
+
+
+_FIRE_CLASS = {"moderate": "fd-mod", "high": "fd-high", "extreme": "fd-ext",
+               "catastrophic": "fd-cat", "no rating": "fd-none"}
+
+
+def local_section(local, weather):
+    if not local:
+        return ""
+    place = esc(local.get("place", "Local"))
+    # Weather card (data-* lets the browser refresh it live from Open-Meteo)
+    if weather:
+        w = weather
+        sub = "Feels like a {}° day".format(round(w["today_max"])) if w.get("today_max") is not None else ""
+        wcard = (
+            '<div class="ps-card wx" id="wx" data-lat="{lat}" data-lon="{lon}">'
+            '<div class="wx-now"><span class="wx-emoji" id="wx-emoji">{emoji}</span>'
+            '<span class="wx-temp" id="wx-temp">{temp}°</span>'
+            '<span class="wx-text" id="wx-text">{text}</span></div>'
+            '<div class="wx-meta" id="wx-meta">{hi}{lo}Wind {wind} km/h · Hum {hum}% · Rain {rain}%</div>'
+            "</div>"
+        ).format(
+            lat=local.get("lat", ""), lon=local.get("lon", ""),
+            emoji=w.get("emoji", ""), temp=round(w["temp"]) if w.get("temp") is not None else "—",
+            text=esc(w.get("text", "")),
+            hi="High {}° · ".format(round(w["today_max"])) if w.get("today_max") is not None else "",
+            lo="Low {}° · ".format(round(w["today_min"])) if w.get("today_min") is not None else "",
+            wind=round(w["wind"]) if w.get("wind") is not None else "—",
+            hum=round(w["humidity"]) if w.get("humidity") is not None else "—",
+            rain=w.get("today_rain", "—"))
+    else:
+        wcard = ('<div class="ps-card wx" id="wx" data-lat="{lat}" data-lon="{lon}">'
+                 '<div class="wx-now"><span class="wx-text">Weather loading…</span></div></div>').format(
+                    lat=local.get("lat", ""), lon=local.get("lon", ""))
+
+    rating = local.get("fire_rating", "No Rating")
+    fclass = _FIRE_CLASS.get(rating.lower(), "fd-none")
+    fcard = (
+        '<div class="ps-card fire {fclass}">'
+        '<div class="fire-head"><span class="fire-label">Fire danger</span>'
+        '<span class="fire-rating">{rating}</span></div>'
+        '<p class="fire-district">{district}</p>'
+        '<p class="fire-advice">{advice}</p>'
+        "</div>"
+    ).format(fclass=fclass, rating=esc(rating),
+             district=esc(local.get("fire_district", "") + " district"),
+             advice=esc(local.get("fire_advice", "")))
+
+    note = '<p class="ps-note">{}</p>'.format(esc(local["note"])) if local.get("note") else ""
+    body = '<div class="ps-grid">{}{}</div>{}'.format(wcard, fcard, note)
+    return _section(place, "section-local", body)
+
+
+def mining_watch_section(quotes):
+    """quotes: list of (Quote, reason)."""
+    rows = []
+    for q, reason in quotes:
+        if q.ok:
+            rows.append(
+                '<div class="mw-row {dir}"{live}>'
+                '<div class="mw-main"><span class="mw-name">{name}{sens}</span>'
+                '<span class="mw-reason">{reason}</span></div>'
+                '<div class="mw-nums"><span class="mw-price">{price}</span>'
+                '<span class="mw-chg">{arrow} {pct}</span></div>'
+                "</div>".format(
+                    dir=q.direction, live=_live_attr(q), name=esc(q.label),
+                    sens=_sensitive_mark(q), reason=esc(reason), price=fmt_price(q),
+                    arrow=_ARROW[q.direction], pct=esc(fmt_pct(q)))
+            )
+        else:
+            rows.append('<div class="mw-row muted"><div class="mw-main">'
+                        '<span class="mw-name">{name}</span>'
+                        '<span class="mw-reason">{reason}</span></div>'
+                        '<span class="wl-unavail">unavailable</span></div>'.format(
+                            name=esc(q.label), reason=esc(reason)))
+    if not rows:
+        return ""
+    return _section("Chad's Mining & Resources Watch", "section-mining",
+                    '<div class="mw-list">{}</div>'.format("".join(rows)))
+
+
+def prado_section(prado):
+    if not prado:
+        return ""
+    rows = []
+    for label, key in (("Status", "status"), ("Next up", "next"), ("On order", "on_order")):
+        if prado.get(key):
+            rows.append('<div class="prado-row"><span class="prado-k">{k}</span>'
+                        '<span class="prado-v">{v}</span></div>'.format(k=label, v=esc(prado[key])))
+    if not rows:
+        return ""
+    return _section("Prado Build Pulse", "section-prado",
+                    '<div class="prado-card">{}</div>'.format("".join(rows)))
+
+
+def highlights_section(stories):
+    if not stories:
+        return ""
+    items = []
+    for s in stories:
+        title = esc(s.title)
+        if s.link:
+            title = '<a href="{href}" target="_blank" rel="noopener">{t}<span class="ext">↗</span></a>'.format(
+                href=esc(s.link), t=esc(s.title))
+        src = '<span class="src">{}</span>'.format(esc(s.source)) if s.source else ""
+        age = '<span class="age">{}</span>'.format(esc(s.age)) if s.age else ""
+        items.append('<article class="hl"><span class="hl-dot"></span>'
+                     '<div class="hl-body"><h4>{title}</h4>'
+                     '<div class="story-meta">{src}{age}</div></div></article>'.format(
+                         title=title, src=src, age=age))
+    return _section("Chad's Highlights", "section-highlights",
+                    '<div class="hl-list">{}</div>'.format("".join(items)),
+                    extra_head='<span class="hl-tag">picked for you</span>')
+
+
+# --------------------------------------------------------------------------
 # Shell
 # --------------------------------------------------------------------------
 def _section(title, anchor, body, extra_head=""):
@@ -380,18 +523,27 @@ def _reading_time(ctx):
 
 
 def render_page(ctx):
+    now_dt = ctx["now_dt"]
     sections = [
+        todays_focus_section(ctx.get("focus"), now_dt),
+        local_section(ctx.get("local"), ctx.get("weather")),
         market_snapshot(ctx["market_groups"]),
+        mining_watch_section(ctx.get("mining_watch") or []),
         themes_section(ctx["synth"]),
         watch_section(ctx["synth"]),
         economy_section(ctx.get("recession"), ctx.get("economy")),
+        highlights_section(ctx.get("highlights") or []),
         news_section(ctx["news_buckets"], ctx["categories"]),
         watchlist_section(ctx["watchlist"]),
+        prado_section(ctx.get("prado")),
     ]
     nav_meta = [
-        ("section-markets", "Markets"), ("section-themes", "Overnight"),
-        ("section-watch", "Watch"), ("section-economy", "Economy"),
+        ("section-focus", "Focus"), ("section-local", "Local"),
+        ("section-markets", "Markets"), ("section-mining", "Mining"),
+        ("section-themes", "Overnight"), ("section-watch", "Watch"),
+        ("section-economy", "Economy"), ("section-highlights", "Highlights"),
         ("section-news", "News"), ("section-watchlist", "Watchlist"),
+        ("section-prado", "Prado"),
     ]
     present = {s.split('id="', 1)[1].split('"', 1)[0] for s in sections if s}
     nav_links = "".join(
@@ -399,13 +551,19 @@ def render_page(ctx):
     body = "".join(s for s in sections if s)
     short = esc(ctx["title"].split("'")[0] if "'" in ctx["title"] else ctx["title"])
 
+    # Greeting split so the browser can correct the time-of-day word to the
+    # viewer's clock (the page is built once in the early morning).
+    part = "morning" if now_dt.hour < 12 else ("afternoon" if now_dt.hour < 18 else "evening")
+    greeting_html = 'Good <span id="greet-part">{}</span>, {}.'.format(
+        part, esc(ctx.get("owner", "Chad")))
+
     return PAGE_TEMPLATE.format(
         title=esc(ctx["title"]),
         short=short,
-        greeting=esc(ctx["greeting"]),
+        greeting=greeting_html,
         date_full=esc(ctx["date_full"]),
         tagline=esc(ctx["tagline"]),
-        status=_market_status(ctx["now_dt"]),
+        status=_market_status(now_dt),
         mood=esc(ctx["synth"].get("mood", "")),
         read=_reading_time(ctx),
         nav_links=nav_links,
@@ -488,6 +646,39 @@ SCRIPTS = """<script>
   updateStatus();
   setInterval(updateStatus, 60000);            // keep it correct if the page stays open
 
+  // Time-aware greeting from the viewer's AEST clock (page is built pre-dawn).
+  function updateGreeting(){
+    var el = document.getElementById('greet-part'); if(!el) return;
+    var syd; try { syd = new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'})); } catch(e){ return; }
+    var h = syd.getHours();
+    el.textContent = h < 12 ? 'morning' : (h < 18 ? 'afternoon' : 'evening');
+  }
+  updateGreeting(); setInterval(updateGreeting, 60000);
+
+  // Live local weather (Open-Meteo, CORS) — keeps the Port Stephens brief current.
+  var WMO={0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],
+    45:['Fog','🌫️'],48:['Rime fog','🌫️'],51:['Light drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy drizzle','🌧️'],
+    61:['Light rain','🌦️'],63:['Rain','🌧️'],65:['Heavy rain','🌧️'],71:['Light snow','🌨️'],73:['Snow','🌨️'],
+    75:['Heavy snow','❄️'],80:['Light showers','🌦️'],81:['Showers','🌧️'],82:['Heavy showers','⛈️'],
+    95:['Thunderstorm','⛈️'],96:['Storm + hail','⛈️'],99:['Storm + hail','⛈️']};
+  function setTxt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  function updateWeather(){
+    var wx=document.getElementById('wx'); if(!wx||!window.fetch) return;
+    var lat=wx.getAttribute('data-lat'), lon=wx.getAttribute('data-lon'); if(!lat||!lon) return;
+    var u='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
+      '&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m,precipitation'+
+      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia%2FSydney&forecast_days=1';
+    fetch(u).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      if(!d||!d.current) return; var c=d.current, w=WMO[c.weather_code]||['—','🌡️'], dl=d.daily||{};
+      setTxt('wx-emoji',w[1]); setTxt('wx-temp',Math.round(c.temperature_2m)+'°'); setTxt('wx-text',w[0]);
+      var hi=dl.temperature_2m_max&&dl.temperature_2m_max[0]!=null?'High '+Math.round(dl.temperature_2m_max[0])+'° · ':'';
+      var lo=dl.temperature_2m_min&&dl.temperature_2m_min[0]!=null?'Low '+Math.round(dl.temperature_2m_min[0])+'° · ':'';
+      var rain=dl.precipitation_probability_max&&dl.precipitation_probability_max[0]!=null?dl.precipitation_probability_max[0]:'—';
+      setTxt('wx-meta', hi+lo+'Wind '+Math.round(c.wind_speed_10m)+' km/h · Hum '+Math.round(c.relative_humidity_2m)+'% · Rain '+rain+'%');
+    }).catch(function(){});
+  }
+  updateWeather(); setInterval(updateWeather, 600000);
+
   var btn = document.getElementById('theme-btn');
   function effective(){
     var set = document.documentElement.getAttribute('data-theme');
@@ -550,6 +741,8 @@ SCRIPTS = """<script>
         if(rg){ rg.classList.remove('up','down','flat','range--none'); rg.classList.add(dir); }
       }
       var as=el.querySelector('.q-asof'); if(as) as.remove();
+      var dl=el.getAttribute('data-danger');   // bond danger: re-evaluate live
+      if(dl!=null){ var lvl=parseFloat(dl); if(!isNaN(lvl)) el.classList.toggle('danger', last>=lvl); }
     }
   }
   function refresh(){
@@ -830,14 +1023,80 @@ a:hover{text-decoration:underline}
 .foot p{margin:0 0 5px}
 .foot-fine{font-size:11.5px}
 
+/* Bond danger */
+.row.danger{background:color-mix(in srgb,var(--down) 12%,transparent); border-radius:8px; margin:0 -8px; padding-left:8px; padding-right:8px}
+.row.danger .q-price{color:var(--down)}
+.warn{display:none; color:var(--down); margin-left:5px; font-size:13px}
+.row.danger .warn{display:inline}
+
+/* Today's Focus */
+.focus-intent{margin:0 0 12px; font-size:17px; font-weight:600; color:var(--ink)}
+.focus-list{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:7px}
+.focus-list li{font-size:14.5px; color:var(--ink-soft); padding-left:4px}
+.focus-list li::marker{color:var(--accent); font-weight:800}
+.focus-quote{margin:16px 0 0; padding:12px 16px; background:var(--panel); border:1px solid var(--line);
+  border-left:3px solid var(--kicker); border-radius:10px; font-size:15px; font-style:italic; color:var(--ink)}
+.focus-who{display:block; margin-top:5px; font-style:normal; font-size:12.5px; font-weight:700; color:var(--ink-faint)}
+
+/* Port Stephens brief */
+.ps-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:14px}
+.ps-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow)}
+.wx-now{display:flex; align-items:center; gap:12px}
+.wx-emoji{font-size:34px; line-height:1}
+.wx-temp{font-size:30px; font-weight:780; letter-spacing:-.02em}
+.wx-text{font-size:15px; color:var(--ink-soft); font-weight:600}
+.wx-meta{margin-top:10px; font-size:12.5px; color:var(--ink-faint); font-weight:600}
+.fire{border-left:4px solid var(--flat)}
+.fire-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
+.fire-label{font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+.fire-rating{font-size:18px; font-weight:800}
+.fire-district{margin:8px 0 2px; font-size:13px; color:var(--ink-soft)}
+.fire-advice{margin:0; font-size:13.5px; font-weight:600; color:var(--ink)}
+.fire.fd-mod{border-left-color:#2e8b57} .fire.fd-mod .fire-rating{color:#2e8b57}
+.fire.fd-high{border-left-color:#e0a32c} .fire.fd-high .fire-rating{color:#e0a32c}
+.fire.fd-ext{border-left-color:#e0712c} .fire.fd-ext .fire-rating{color:#e0712c}
+.fire.fd-cat{border-left-color:var(--down)} .fire.fd-cat .fire-rating{color:var(--down)}
+.ps-note{margin:14px 0 0; font-size:14px; color:var(--ink-soft); padding-left:12px; border-left:3px solid var(--accent)}
+
+/* Mining & Resources watch */
+.mw-list{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px}
+.mw-row{display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--panel);
+  border:1px solid var(--line); border-radius:12px; padding:11px 14px; box-shadow:var(--shadow)}
+.mw-main{display:flex; flex-direction:column; gap:2px; min-width:0}
+.mw-name{font-weight:680; font-size:14.5px}
+.mw-reason{font-size:11.5px; color:var(--ink-faint); line-height:1.35}
+.mw-nums{display:flex; flex-direction:column; align-items:flex-end; flex:none}
+.mw-price{font-variant-numeric:tabular-nums; font-weight:720; font-size:14.5px; color:var(--ink)}
+.mw-chg{font-variant-numeric:tabular-nums; font-size:12.5px; font-weight:650}
+.mw-row.up .mw-chg{color:var(--up)} .mw-row.down .mw-chg{color:var(--down)} .mw-row.flat .mw-chg{color:var(--flat)}
+
+/* Prado */
+.prado-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:6px 16px; box-shadow:var(--shadow)}
+.prado-row{display:grid; grid-template-columns:84px 1fr; gap:12px; padding:11px 0; border-top:1px solid var(--line)}
+.prado-row:first-child{border-top:none}
+.prado-k{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker); padding-top:2px}
+.prado-v{font-size:14.5px; color:var(--ink)}
+
+/* Highlights */
+.hl-tag{font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker);
+  border:1px solid var(--line); border-radius:6px; padding:1px 7px}
+.hl-list{display:flex; flex-direction:column; gap:2px}
+.hl{display:flex; gap:12px; padding:13px 0; border-top:1px solid var(--line)}
+.hl:first-child{border-top:none}
+.hl-dot{flex:none; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-top:7px}
+.hl-body h4{margin:0 0 3px; font-size:15.5px; font-weight:660; line-height:1.34}
+.hl-body h4 a{color:var(--ink)} .hl-body h4 a:hover{color:var(--accent)}
+
 /* Card hover lift + fade-in */
-.market-card,.eco-card,.watch-list li{transition:transform .18s ease, box-shadow .18s ease}
-.market-card:hover,.eco-card:hover{transform:translateY(-2px)}
+.market-card,.eco-card,.watch-list li,.ps-card,.mw-row{transition:transform .18s ease, box-shadow .18s ease}
+.market-card:hover,.eco-card:hover,.mw-row:hover{transform:translateY(-2px)}
 main>.section{animation:rise .5s ease both}
 @keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 
 @media (max-width:560px){
+  .ps-grid{grid-template-columns:1fr}
+  .mw-list{grid-template-columns:1fr}
   .wrap{padding:20px 15px 48px}
   .greeting{font-size:27px}
   .market-grid,.news-grid{grid-template-columns:1fr}

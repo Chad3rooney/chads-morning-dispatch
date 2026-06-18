@@ -160,20 +160,29 @@ def _norm_title(t):
     return re.sub(r"[^a-z0-9]+", "", t.lower())[:80]
 
 
-def gather(feeds, lookback_hours=30, per_category=6, timeout=12):
+def gather(feeds, lookback_hours=30, per_category=6, timeout=12, exclude_business=None):
     """Fetch all feeds, dedupe, filter by recency, and bucket by category.
+
+    exclude_business: optional list of lowercase substrings; a Business & Markets
+    story whose title contains any is dropped (filters personal-finance noise).
 
     Returns: dict category_key -> list[Story] (already trimmed + dated).
     """
     now_dt, _ = timeutil.now_aest()
     cutoff = now_dt.timestamp() - lookback_hours * 3600
+    exclude_business = [e.lower() for e in (exclude_business or [])]
 
     all_stories = []
     for feed in feeds:
         body = http.get(feed["url"], timeout=timeout, retries=2)
         if not body:
             continue
-        all_stories.extend(_parse_feed(body, feed))
+        for s in _parse_feed(body, feed):
+            if s.category == "business" and exclude_business:
+                t = s.title.lower()
+                if any(x in t for x in exclude_business):
+                    continue
+            all_stories.append(s)
 
     # Dedupe by normalised title and by link, keeping the newest.
     seen_titles = {}
@@ -215,3 +224,28 @@ def gather(feeds, lookback_hours=30, per_category=6, timeout=12):
         if len(buckets[s.category]) < per_category:
             buckets[s.category].append(s)
     return buckets
+
+
+def pick_highlights(buckets, keywords, limit=4):
+    """Pick the stories most relevant to Chad (mining juniors, resources, energy,
+    macro, career) by keyword score across all categories. Returns list[Story]."""
+    kws = [k.lower() for k in (keywords or [])]
+    if not kws:
+        return []
+    scored = []
+    seen = set()
+    for items in buckets.values():
+        for s in items:
+            key = _norm_title(s.title)
+            if key in seen:
+                continue
+            seen.add(key)
+            blob = (s.title + " " + (s.summary or "")).lower()
+            score = sum(2 if k in s.title.lower() else 1 for k in kws if k in blob)
+            # Mining/resources category is inherently on-theme — nudge it up.
+            if s.category == "mining":
+                score += 1
+            if score > 0:
+                scored.append((score, s))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [s for _, s in scored[:limit]]

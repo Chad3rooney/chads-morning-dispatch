@@ -99,6 +99,8 @@ class Quote(object):
         self.sensitive = False      # ASX price-sensitive announcement flag
         self.sensitive_note = ""    # headline of that announcement (for the tooltip)
         self.no_live = False        # True for non-CNBC quotes the browser can't refresh
+        self.danger = False         # bond yield at/above its danger threshold
+        self.danger_at = None       # the threshold (for the tooltip / live JS)
 
     @property
     def day_range_pct(self):
@@ -303,6 +305,20 @@ def apply_announcements(quotes, flags):
         if f and f.get("sensitive"):
             q.sensitive = True
             q.sensitive_note = f.get("headline", "Price-sensitive announcement")
+    return quotes
+
+
+def apply_bond_danger(quotes, thresholds):
+    """Attach each configured bond's danger threshold (so the row can be
+    re-evaluated live in the browser) and flag it red when the yield is at or
+    above that level."""
+    for q in quotes:
+        lvl = (thresholds or {}).get(q.symbol)
+        if lvl is None:
+            continue
+        q.danger_at = lvl
+        if q.ok and q.price is not None and q.price >= lvl:
+            q.danger = True
     return quotes
 
 
