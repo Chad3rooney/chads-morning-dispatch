@@ -297,7 +297,46 @@ LOCAL = {
     "fire_rating": "Moderate",            # Moderate | High | Extreme | Catastrophic | No Rating
     "fire_advice": "Plan and prepare.",
     "note": "Good conditions for outdoor work and Prado jobs today.",
+    # Birubi / Stockton Bight for beach-driving swell + wind (live).
+    "beach_name": "Birubi · Stockton Bight",
+    "beach_lat": -32.79, "beach_lon": 152.10,
 }
+
+# ---------------------------------------------------------------------------
+# FUEL — cheapest U91 via projectzerothree (free, keyless). state-level (NSW),
+# so it reads as the market floor rather than a Port Stephens pump price.
+# ---------------------------------------------------------------------------
+FUEL = {"state": "NSW", "type": "U91"}
+
+# ---------------------------------------------------------------------------
+# HSC_EXAM — countdown to the first written exam. 13 Oct 2026, 9:50am is AEDT.
+# ---------------------------------------------------------------------------
+HSC_EXAM = {
+    "label": "first HSC exam · English",
+    "when": "2026-10-13T09:50:00+11:00",
+}
+
+# ---------------------------------------------------------------------------
+# MICRO_PICKS — a speculative "pick of the day" rotated daily. High-risk junior
+# explorers; the thesis is a talking point, NOT advice. Edit freely.
+# ---------------------------------------------------------------------------
+MICRO_PICKS = [
+    ("TMS.AX", "Tennant Minerals",
+     "High-grade copper-gold at Bluebird (NT). Tight register and steady drill "
+     "news-flow — the kind of catalyst pipeline that re-rates a micro fast if hits land."),
+    ("SHN.AX", "Sunshine Metals",
+     "Qld copper-gold-zinc (VMS) with a growing resource. Direct leverage to a "
+     "copper re-rate, and resource upgrades are the obvious value trigger."),
+    ("TSO.AX", "Tesoro Gold",
+     "Kun gold project, Chile. Gold-in-AUD sitting near records is a real tailwind "
+     "for any explorer that can grow ounces."),
+    ("AZY.AX", "Antipa Minerals",
+     "Paterson Province gold-copper next door to the majors. JV optionality with "
+     "big neighbours is the asymmetric angle."),
+    ("BHL.AX", "Black Horse Mining",
+     "Pure early-stage spec — iron ore / exploration. Lottery-ticket risk; only "
+     "ever a small, position-sized punt."),
+]
 
 # ---------------------------------------------------------------------------
 # TODAYS_FOCUS — a short personal intention + a rotating quote. Edit freely;

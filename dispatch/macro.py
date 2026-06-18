@@ -14,6 +14,16 @@ def _find(all_quotes, symbol):
     return None
 
 
+def gold_in_aud(all_quotes):
+    """Gold priced in AUD/oz = gold USD/oz ÷ (USD per AUD). The benchmark most
+    ASX gold juniors actually track. Returns a float or None."""
+    gold = _find(all_quotes, "GC=F")          # USD/oz
+    aud = _find(all_quotes, "AUDUSD=X")        # USD per 1 AUD
+    if not gold or not aud or not aud.price:
+        return None
+    return gold.price / aud.price
+
+
 def recession_signal(all_quotes):
     """Return a dict describing the curve-based recession signal, or None."""
     y2 = _find(all_quotes, "US2Y")

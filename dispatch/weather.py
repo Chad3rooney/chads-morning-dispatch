@@ -9,6 +9,9 @@ API = ("https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}"
        "&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max,weather_code"
        "&timezone=Australia%2FSydney&forecast_days=2")
 
+MARINE = ("https://marine-api.open-meteo.com/v1/marine?latitude={lat}&longitude={lon}"
+          "&current=wave_height,wave_period,wind_wave_height&timezone=Australia%2FSydney")
+
 # WMO weather codes -> (short text, emoji)
 WMO = {
     0: ("Clear", "☀️"), 1: ("Mainly clear", "\U0001f324️"),
@@ -60,3 +63,25 @@ def fetch_weather(lat, lon, timeout=12):
     except (KeyError, IndexError, TypeError):
         pass
     return out
+
+
+def fetch_marine(lat, lon, timeout=12):
+    """Swell for the beach-driving readout. Returns dict or None."""
+    data = http.get_json(MARINE.format(lat=lat, lon=lon), timeout=timeout, retries=2)
+    try:
+        c = data["current"]
+    except (TypeError, KeyError):
+        return None
+    return {"wave_height": c.get("wave_height"), "wave_period": c.get("wave_period"),
+            "wind_wave": c.get("wind_wave_height")}
+
+
+def beach_verdict(wave_height, wind_kmh):
+    """Rough beach-driving call from swell + wind (firmer sand at low swell/wind)."""
+    if wave_height is None:
+        return ("—", "")
+    if wave_height <= 1.0 and (wind_kmh or 0) < 25:
+        return ("Good", "low swell, manageable wind — fine for the sand")
+    if wave_height <= 1.6 and (wind_kmh or 0) < 35:
+        return ("Fair", "moderate swell/wind — check the tide before committing")
+    return ("Poor", "big swell or strong wind — soft, sketchy access")
