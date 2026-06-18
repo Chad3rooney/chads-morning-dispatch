@@ -84,13 +84,22 @@ MARKET_GROUPS = [
         ],
     },
     {
+        "title": "World Markets",
+        "note": "Major global indices",
+        "tickers": [
+            (".FTSE", "FTSE 100"),        # CNBC-native indices
+            (".GDAXI", "DAX (Germany)"),
+            (".N225", "Nikkei 225"),
+            (".HSI", "Hang Seng"),
+        ],
+    },
+    {
         "title": "Australia",
         "note": "Local context (prior close)",
         "tickers": [
             ("^AXJO", "ASX 200"),
             ("^AORD", "All Ordinaries"),
             ("AUDUSD=X", "AUD / USD"),
-            ("AU10Y", "AU 10Y Bond"),     # CNBC-native
         ],
     },
     {
@@ -104,11 +113,23 @@ MARKET_GROUPS = [
         ],
     },
     {
-        "title": "Rates & Risk",
-        "note": "Yields, USD & volatility",
+        "title": "Sovereign Bonds",
+        "note": "10Y yields & the curve",
         "tickers": [
-            ("US2Y", "US 2Y Yield"),      # CNBC-native
-            ("^TNX", "US 10Y Yield"),
+            ("US2Y", "US 2Y"),            # CNBC-native rate symbols
+            ("^TNX", "US 10Y"),
+            ("US30Y", "US 30Y"),
+            ("AU2Y", "Australia 2Y"),
+            ("AU10Y", "Australia 10Y"),
+            ("DE10Y-DE", "Germany 10Y"),
+            ("GB10Y-GB", "UK 10Y"),
+            ("JP10Y-JP", "Japan 10Y"),
+        ],
+    },
+    {
+        "title": "Rates & Risk",
+        "note": "USD & volatility",
+        "tickers": [
             ("DX-Y.NYB", "US Dollar Index"),
             ("^VIX", "VIX Volatility"),
         ],
@@ -136,6 +157,10 @@ WATCHLIST = [
     ("PLS.AX", "Pilbara Minerals"),
     ("LYC.AX", "Lynas Rare Earths"),
     ("NST.AX", "Northern Star"),
+    # Explorers & small caps
+    ("SHN.AX", "Sunshine Metals"),
+    ("TSO.AX", "Tesoro Gold"),
+    ("AZY.AX", "Antipa Minerals"),
     # Energy
     ("WDS.AX", "Woodside Energy"),
     ("STO.AX", "Santos"),
@@ -216,4 +241,44 @@ SYNTHESIS = {
         "not a hype newsletter. Connect overnight moves to what they mean for "
         "Australia where relevant."
     ),
+}
+
+# ---------------------------------------------------------------------------
+# ANNOUNCEMENTS — ASX price-sensitive announcement flags on the watchlist.
+#
+# For each ASX (.AX) watchlist ticker we check the ASX announcements feed and,
+# if a *price-sensitive* announcement landed within `lookback_hours`, mark the
+# stock with a red asterisk (hover shows the headline). Best-effort: a failed
+# lookup just means no flag.
+# ---------------------------------------------------------------------------
+ANNOUNCEMENTS = {
+    "enabled": True,
+    "lookback_hours": 48,
+}
+
+# ---------------------------------------------------------------------------
+# ECONOMY — the "Economy & Rates" section: policy rates, a yield-curve-based
+# recession gauge, and the housing block.
+#
+# Policy rates and housing have no clean free live feed, so they're set here and
+# updated by hand when they change (rarely). Everything else on the page is live.
+# The recession gauge is computed automatically from the US 2s10s yield curve.
+# ---------------------------------------------------------------------------
+ECONOMY = {
+    # Central-bank policy rates — update after each decision (≈8×/year).
+    "policy_rates": [
+        {"name": "RBA Cash Rate",   "value": "3.85%", "note": "Reserve Bank of Australia", "as_at": "2026-05"},
+        {"name": "US Fed Funds",    "value": "4.25–4.50%", "note": "Upper bound 4.50%", "as_at": "2026-05"},
+        {"name": "ECB Deposit Rate","value": "2.00%", "note": "European Central Bank", "as_at": "2026-05"},
+        {"name": "BoE Bank Rate",   "value": "4.00%", "note": "Bank of England", "as_at": "2026-05"},
+    ],
+    # AU housing — update from ABS/CoreLogic monthly. No reliable free live API.
+    "housing": {
+        "as_at": "Update me in config.py → ECONOMY['housing']",
+        "rows": [
+            {"name": "National median dwelling", "value": "$820,000", "change": "+0.4% m/m"},
+            {"name": "Sydney median dwelling",   "value": "$1,190,000", "change": "+0.3% m/m"},
+            {"name": "NSW regional median",      "value": "$745,000", "change": "+0.5% m/m"},
+        ],
+    },
 }

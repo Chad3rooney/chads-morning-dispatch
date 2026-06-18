@@ -96,6 +96,9 @@ class Quote(object):
         self.year_low = year_low
         self.stale = False          # True when filled from the last-known-good cache
         self.as_of = ""             # friendly timestamp of the cached value
+        self.sensitive = False      # ASX price-sensitive announcement flag
+        self.sensitive_note = ""    # headline of that announcement (for the tooltip)
+        self.no_live = False        # True for non-CNBC quotes the browser can't refresh
 
     @property
     def day_range_pct(self):
@@ -205,9 +208,14 @@ def _fetch_cnbc_batch(pairs, timeout):
         price = _parse_num(q.get("last"))
         if price is None:
             continue
+        # Use CNBC's own day-change field, not last - previous_day_closing: when a
+        # market is closed CNBC sets previous_day_closing == last (giving a false
+        # 0.00%), but `change` still reflects the last session's move.
+        chg = _parse_num(q.get("change"))     # None for "UNCH"
+        prev = price - (chg if chg is not None else 0.0)
         out[symbol] = Quote(
             symbol=symbol, label=label, price=price,
-            prev_close=_parse_num(q.get("previous_day_closing")),
+            prev_close=prev,
             currency=q.get("currencyCode"), name=q.get("name"),
             day_open=_parse_num(q.get("open")),
             day_high=_parse_num(q.get("high")),
@@ -218,15 +226,96 @@ def _fetch_cnbc_batch(pairs, timeout):
     return out
 
 
+# ---------------------------------------------------------------------------
+# ASX (markitdigital) — a server-side source for ASX tickers CNBC doesn't carry
+# (e.g. small-cap explorers) and for price-sensitive announcement flags. It has
+# no CORS headers, so these can't refresh in the browser — markitdigital quotes
+# are flagged no_live.
+# ---------------------------------------------------------------------------
+MARKIT = "https://asx.api.markitdigital.com/asx-research/1.0/companies/{t}/{ep}"
+
+
+def _markit_code(symbol):
+    return symbol[:-3].lower() if symbol.upper().endswith(".AX") else None
+
+
+def _fetch_markit_quote(symbol, label, timeout):
+    code = _markit_code(symbol)
+    if not code:
+        return None
+    data = http.get_json(MARKIT.format(t=code, ep="header"), timeout=timeout, retries=1)
+    try:
+        d = data["data"]
+    except (TypeError, KeyError):
+        return None
+    last = d.get("priceLast")
+    if last is None:
+        return None
+    chg = d.get("priceChange") or 0
+    q = Quote(symbol, label, last, last - chg,
+              currency="AUD", name=d.get("displayName"))
+    q.no_live = True            # markitdigital has no CORS; can't refresh client-side
+    return q
+
+
+def fetch_announcements(symbols, lookback_hours=48, timeout=12):
+    """Return {symbol: {sensitive, headline, date}} for ASX tickers with a
+    price-sensitive announcement in the lookback window. Best-effort."""
+    from datetime import datetime as _dt, timezone as _tz
+    cutoff = _dt.now(_tz.utc).timestamp() - lookback_hours * 3600
+    out = {}
+    for symbol in symbols:
+        code = _markit_code(symbol)
+        if not code:
+            continue
+        data = http.get_json(MARKIT.format(t=code, ep="announcements") +
+                             "?pageSize=8&itemsPerPage=8", timeout=timeout, retries=1)
+        try:
+            items = data["data"]["items"]
+        except (TypeError, KeyError):
+            continue
+        for it in items or []:
+            if not it.get("isPriceSensitive"):
+                continue
+            ts = _parse_iso(it.get("date"))
+            if ts is not None and ts < cutoff:
+                continue
+            out[symbol] = {"sensitive": True, "headline": it.get("headline", ""),
+                           "date": it.get("date", "")}
+            break
+        time.sleep(0.1)
+    return out
+
+
+def _parse_iso(s):
+    from datetime import datetime as _dt, timezone as _tz
+    if not s:
+        return None
+    try:
+        return _dt.fromisoformat(s.replace("Z", "+00:00")).timestamp()
+    except ValueError:
+        return None
+
+
+def apply_announcements(quotes, flags):
+    for q in quotes:
+        f = flags.get(q.symbol)
+        if f and f.get("sensitive"):
+            q.sensitive = True
+            q.sensitive_note = f.get("headline", "Price-sensitive announcement")
+    return quotes
+
+
 def fetch_quotes(pairs, timeout=12, polite_delay=0.15):
     """Fetch a list of (symbol, label) tuples. Returns a list of Quote.
 
     Strategy, ordered for reliability and speed:
-      1. One CNBC batch call resolves almost everything (keyless, works from
-         CI/datacenter IPs where Yahoo is blocked).
+      1. One CNBC batch call resolves almost everything (keyless, CORS-enabled,
+         works from CI/datacenter IPs where Yahoo is blocked).
       2. For US equity-index futures, prefer Yahoo's *real* overnight futures
          over CNBC's cash-index stand-in, when Yahoo is reachable.
-      3. Anything still missing falls back to a per-symbol Yahoo fetch.
+      3. Remaining ASX tickers fall back to the ASX (markitdigital) feed; any
+         other gap falls back to a per-symbol Yahoo fetch.
     A symbol that every source fails simply drops out — the briefing still renders.
     """
     resolved = {}
@@ -243,6 +332,10 @@ def fetch_quotes(pairs, timeout=12, polite_delay=0.15):
             q = _fetch_one(symbol, label, timeout)
             if q.ok:
                 resolved[symbol] = q          # real futures upgrade / fill the gap
+            elif _markit_code(symbol):
+                mq = _fetch_markit_quote(symbol, label, timeout)
+                if mq and mq.ok:
+                    resolved[symbol] = mq
             if polite_delay:
                 time.sleep(polite_delay)
 

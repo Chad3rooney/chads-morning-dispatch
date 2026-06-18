@@ -19,7 +19,7 @@ import sys
 import traceback
 
 from dispatch import config as cfg
-from dispatch import markets, news, synthesis, render, timeutil
+from dispatch import markets, news, synthesis, render, timeutil, macro
 
 
 def _greeting(now_dt, owner):
@@ -70,6 +70,18 @@ def build(out_dir):
     print("  %d live, %d from cache, %d/%d total resolved" % (
         live, stale, sum(1 for q in flat if q.ok), len(flat)))
 
+    # Recession signal from the yield curve (no extra source).
+    recession = _safe("recession", lambda: macro.recession_signal(flat), None)
+
+    # Price-sensitive ASX announcement flags on the watchlist.
+    if cfg.__dict__.get("ANNOUNCEMENTS", {}).get("enabled"):
+        print("- ASX announcements")
+        flags = _safe("announcements", lambda: markets.fetch_announcements(
+            [s for s, _ in cfg.WATCHLIST],
+            cfg.ANNOUNCEMENTS.get("lookback_hours", 48), timeout=timeout), {})
+        markets.apply_announcements(watchlist, flags)
+        print("  %d price-sensitive flag(s)" % sum(1 for q in watchlist if q.sensitive))
+
     print("- News: %d feeds" % len(cfg.NEWS_FEEDS))
     news_buckets = _safe("news", lambda: news.gather(
         cfg.NEWS_FEEDS,
@@ -99,6 +111,8 @@ def build(out_dir):
         "news_buckets": news_buckets,
         "categories": cfg.NEWS_CATEGORIES,
         "watchlist": watchlist,
+        "recession": recession,
+        "economy": cfg.__dict__.get("ECONOMY"),
     }
 
     print("- Rendering")
@@ -114,6 +128,10 @@ def build(out_dir):
     archive_path = os.path.join(archive_dir, "%s.html" % date_key)
     with open(archive_path, "w", encoding="utf-8") as f:
         f.write(page)
+
+    # The brain-warmer: a self-contained Minesweeper page linked from the nav.
+    with open(os.path.join(out_dir, "minesweeper.html"), "w", encoding="utf-8") as f:
+        f.write(render.minesweeper_page(cfg.SITE["title"]))
 
     _write_archive_index(archive_dir, cfg.SITE["title"])
 

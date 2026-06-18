@@ -7,8 +7,9 @@ venv/
 # OS
 .DS_Store
 
-# Build output: keep the dated archive (history), ignore the volatile latest page.
+# Build output: keep the dated archive (history), ignore the volatile latest pages.
 /public/index.html
+/public/minesweeper.html
 
 # Local environment
 .env

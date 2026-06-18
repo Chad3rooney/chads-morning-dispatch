@@ -24,13 +24,14 @@ already there.
 
 | Section | What it gives you |
 |---|---|
-| **Market Snapshot** | 27 instruments in 7 groups — US markets, metals & mining (incl. **iron ore**, platinum, palladium), energy, Australia (ASX 200, All Ords, AUD/USD, **AU 10Y bond**), major FX, rates & risk (US 2Y/10Y, USD index, **VIX**), crypto (BTC/ETH). Price, change, %, a **day-range bar**, colour + arrows, plus an auto **big-movers** strip and up/down breadth. |
+| **Market Snapshot** | ~38 instruments in 9 groups — US markets, **world markets** (FTSE/DAX/Nikkei/Hang Seng), metals & mining (incl. **iron ore**, platinum, palladium), energy, Australia, major FX, **sovereign bonds** (US 2/10/30Y, AU 2/10Y, Bund, Gilt, JGB), USD & VIX, crypto. Price, change, %, a **day-range bar**, colour + arrows, an auto **big-movers** strip and up/down breadth. **Prices refresh live** in the browser. |
 | **Overnight Themes** | 4–6 high‑signal themes synthesising the night — *what happened and why it matters*. Written by Claude when a key is set; a sharp rule‑based version otherwise. |
 | **What to Watch Today** | The catalysts, releases and risks worth monitoring during the day — market movers **and** developing news, never empty. |
+| **Economy & Rates** | A yield-curve **recession-risk gauge**, central-bank policy rates, and an AU **housing** block (national + Sydney + NSW). |
 | **News & Announcements** | Two-column, categorised: Business & Markets · Australia · Geopolitics & Global · Mining, Resources & Energy. Full title, excerpt, source, age, direct link. |
-| **Personal Watchlist** | Your selected stocks/indices with price, change and %. |
+| **Personal Watchlist** | Selected stocks with price, change, %, and a **red ✱** when an ASX name has a recent price-sensitive announcement (hover for the headline). |
 
-Plus a real **light/dark toggle** (remembers your choice, defaults to your system), a **sticky section nav**, and a reading-time estimate. Everything is steered from one file: [`dispatch/config.py`](dispatch/config.py).
+Plus **live prices** (static cache loads instantly, then refreshes from CNBC every minute — so it's current whenever you open it, and shows the prior session's result when a market is shut), a real **light/dark toggle**, a **sticky section nav**, a reading-time estimate, and a **Minesweeper** brain-warmer ([`minesweeper.html`](minesweeper.html)) linked from the nav. Everything is steered from one file: [`dispatch/config.py`](dispatch/config.py).
 
 ---
 
