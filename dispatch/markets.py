@@ -278,7 +278,7 @@ def fetch_announcements(symbols, lookback_hours=48, timeout=12):
             if not it.get("isPriceSensitive"):
                 continue
             ts = _parse_iso(it.get("date"))
-            if ts is not None and ts < cutoff:
+            if ts is None or ts < cutoff:        # only flag a confirmed-recent item
                 continue
             out[symbol] = {"sensitive": True, "headline": it.get("headline", ""),
                            "date": it.get("date", "")}

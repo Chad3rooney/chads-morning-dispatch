@@ -272,9 +272,11 @@ ECONOMY = {
         {"name": "ECB Deposit Rate","value": "2.00%", "note": "European Central Bank", "as_at": "2026-05"},
         {"name": "BoE Bank Rate",   "value": "4.00%", "note": "Bank of England", "as_at": "2026-05"},
     ],
-    # AU housing — update from ABS/CoreLogic monthly. No reliable free live API.
+    # AU housing — there is no reliable free live API, so these are indicative
+    # figures you refresh from ABS/CoreLogic (monthly is plenty). Clearly labelled
+    # "indicative" on the page so they're never mistaken for a live feed.
     "housing": {
-        "as_at": "Update me in config.py → ECONOMY['housing']",
+        "as_at": "indicative · update in config",
         "rows": [
             {"name": "National median dwelling", "value": "$820,000", "change": "+0.4% m/m"},
             {"name": "Sydney median dwelling",   "value": "$1,190,000", "change": "+0.3% m/m"},
