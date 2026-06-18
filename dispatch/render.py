@@ -349,29 +349,57 @@ def economy_section(recession, economy):
 # --------------------------------------------------------------------------
 # Personalised sections
 # --------------------------------------------------------------------------
-def todays_focus_section(focus, now_dt):
-    if not focus:
+def _hsc_banner(hsc, now_dt):
+    if not hsc or not hsc.get("when"):
         return ""
-    parts = []
-    if focus.get("intention"):
-        parts.append('<p class="focus-intent">{}</p>'.format(esc(focus["intention"])))
-    pris = focus.get("priorities") or []
-    if pris:
-        lis = "".join('<li>{}</li>'.format(esc(p)) for p in pris)
-        parts.append('<ol class="focus-list">{}</ol>'.format(lis))
-    quotes = focus.get("quotes") or []
-    if quotes:
-        q, who = quotes[now_dt.timetuple().tm_yday % len(quotes)]
-        parts.append('<p class="focus-quote">{}<span class="focus-who">— {}</span></p>'.format(
-            esc(q), esc(who)))
-    return _section("Today's Focus", "section-focus", "".join(parts))
+    from datetime import datetime
+    try:
+        exam = datetime.fromisoformat(hsc["when"])
+    except ValueError:
+        return ""
+    days = (exam - now_dt).days
+    if days < 0:
+        return ""
+    label = esc(hsc.get("label", "first HSC exam"))
+    big = "Today" if days == 0 else ("Tomorrow" if days == 1 else "%d days" % days)
+    return ('<div class="hsc" data-hsc="{iso}"><span class="hsc-big" id="hsc-days">{big}</span>'
+            '<span class="hsc-label">to your {label}</span></div>').format(
+                iso=esc(hsc["when"]), big=big, label=label)
 
 
 _FIRE_CLASS = {"moderate": "fd-mod", "high": "fd-high", "extreme": "fd-ext",
                "catastrophic": "fd-cat", "no rating": "fd-none"}
 
 
-def local_section(local, weather):
+def _beach_fuel_card(local, weather, marine, fuel):
+    from . import weather as _wx
+    rows = []
+    if marine and marine.get("wave_height") is not None:
+        wind = (weather or {}).get("wind")
+        verdict, why = _wx.beach_verdict(marine["wave_height"], wind)
+        vclass = {"Good": "bf-good", "Fair": "bf-fair", "Poor": "bf-poor"}.get(verdict, "")
+        per = " @ {:.0f}s".format(marine["wave_period"]) if marine.get("wave_period") else ""
+        rows.append(
+            '<div class="bf-row"><span class="bf-k">Beach driving</span>'
+            '<span class="bf-v"><span class="bf-verdict {vc}">{verdict}</span> '
+            '<span class="bf-sub">swell {wh:.1f}m{per} — {why}</span></span></div>'.format(
+                vc=vclass, verdict=esc(verdict), wh=marine["wave_height"], per=per, why=esc(why)))
+    if fuel and fuel.get("price") is not None:
+        where = (" — %s" % fuel.get("suburb")) if fuel.get("suburb") else ""
+        rows.append(
+            '<div class="bf-row"><span class="bf-k">{ftype} · cheapest {state}</span>'
+            '<span class="bf-v"><strong>{price:.1f}¢</strong>'
+            '<span class="bf-sub">{where}</span></span></div>'.format(
+                ftype=esc(fuel.get("type", "U91")), state=esc(fuel.get("state", "NSW")),
+                price=fuel["price"], where=esc(where)))
+    if not rows:
+        return ""
+    head = esc(local.get("beach_name", "Beach & fuel"))
+    return ('<div class="ps-card bf"><div class="eco-head"><h3>Beach &amp; fuel</h3>'
+            '<span class="card-note">{}</span></div>{}</div>'.format(head, "".join(rows)))
+
+
+def local_section(local, weather, marine=None, fuel=None):
     if not local:
         return ""
     place = esc(local.get("place", "Local"))
@@ -413,12 +441,13 @@ def local_section(local, weather):
              district=esc(local.get("fire_district", "") + " district"),
              advice=esc(local.get("fire_advice", "")))
 
+    bfcard = _beach_fuel_card(local, weather, marine, fuel)
     note = '<p class="ps-note">{}</p>'.format(esc(local["note"])) if local.get("note") else ""
-    body = '<div class="ps-grid">{}{}</div>{}'.format(wcard, fcard, note)
+    body = '<div class="ps-grid">{}{}{}</div>{}'.format(wcard, fcard, bfcard, note)
     return _section(place, "section-local", body)
 
 
-def mining_watch_section(quotes):
+def mining_watch_section(quotes, gold_aud=None):
     """quotes: list of (Quote, reason)."""
     rows = []
     for q, reason in quotes:
@@ -442,22 +471,30 @@ def mining_watch_section(quotes):
                             name=esc(q.label), reason=esc(reason)))
     if not rows:
         return ""
+    gold = ""
+    if gold_aud is not None:
+        gold = '<span class="gold-aud" id="gold-aud" title="Gold in Australian dollars per ounce — the benchmark most ASX gold juniors track">Gold <strong>A${:,.0f}</strong>/oz</span>'.format(gold_aud)
     return _section("Chad's Mining & Resources Watch", "section-mining",
-                    '<div class="mw-list">{}</div>'.format("".join(rows)))
+                    '<div class="mw-list">{}</div>'.format("".join(rows)), extra_head=gold)
 
 
-def prado_section(prado):
-    if not prado:
+def micro_pick_section(pick, now_dt):
+    """pick: (Quote, label, thesis)."""
+    if not pick:
         return ""
-    rows = []
-    for label, key in (("Status", "status"), ("Next up", "next"), ("On order", "on_order")):
-        if prado.get(key):
-            rows.append('<div class="prado-row"><span class="prado-k">{k}</span>'
-                        '<span class="prado-v">{v}</span></div>'.format(k=label, v=esc(prado[key])))
-    if not rows:
-        return ""
-    return _section("Prado Build Pulse", "section-prado",
-                    '<div class="prado-card">{}</div>'.format("".join(rows)))
+    q, label, thesis = pick
+    price = ('<span class="mp-price {dir}">{p} <span class="mp-chg">{arrow} {pct}</span></span>'.format(
+        dir=q.direction, p=fmt_price(q), arrow=_ARROW[q.direction], pct=esc(fmt_pct(q)))) if q.ok else ""
+    sym = esc(q.symbol.replace(".AX", ".ASX"))
+    return _section("Micro Pick of the Day", "section-pick",
+                    '<div class="pick-card"{live}>'
+                    '<div class="pick-head"><span class="pick-name">{name}</span>'
+                    '<span class="pick-sym">{sym}</span>{price}</div>'
+                    '<p class="pick-why">{why}</p>'
+                    '<p class="pick-risk">Speculative micro-cap — a talking point, not advice. Size accordingly.</p>'
+                    "</div>".format(live=_live_attr(q), name=esc(label), sym=sym,
+                                    price=price, why=esc(thesis)),
+                    extra_head='<span class="hl-tag">high risk</span>')
 
 
 def highlights_section(stories):
@@ -525,25 +562,24 @@ def _reading_time(ctx):
 def render_page(ctx):
     now_dt = ctx["now_dt"]
     sections = [
-        todays_focus_section(ctx.get("focus"), now_dt),
-        local_section(ctx.get("local"), ctx.get("weather")),
+        local_section(ctx.get("local"), ctx.get("weather"), ctx.get("marine"), ctx.get("fuel")),
         market_snapshot(ctx["market_groups"]),
-        mining_watch_section(ctx.get("mining_watch") or []),
+        mining_watch_section(ctx.get("mining_watch") or [], ctx.get("gold_aud")),
+        micro_pick_section(ctx.get("micro_pick"), now_dt),
         themes_section(ctx["synth"]),
         watch_section(ctx["synth"]),
         economy_section(ctx.get("recession"), ctx.get("economy")),
         highlights_section(ctx.get("highlights") or []),
         news_section(ctx["news_buckets"], ctx["categories"]),
         watchlist_section(ctx["watchlist"]),
-        prado_section(ctx.get("prado")),
     ]
     nav_meta = [
-        ("section-focus", "Focus"), ("section-local", "Local"),
+        ("section-local", "Local"),
         ("section-markets", "Markets"), ("section-mining", "Mining"),
-        ("section-themes", "Overnight"), ("section-watch", "Watch"),
-        ("section-economy", "Economy"), ("section-highlights", "Highlights"),
-        ("section-news", "News"), ("section-watchlist", "Watchlist"),
-        ("section-prado", "Prado"),
+        ("section-pick", "Pick"), ("section-themes", "Overnight"),
+        ("section-watch", "Watch"), ("section-economy", "Economy"),
+        ("section-highlights", "Highlights"), ("section-news", "News"),
+        ("section-watchlist", "Watchlist"),
     ]
     present = {s.split('id="', 1)[1].split('"', 1)[0] for s in sections if s}
     nav_links = "".join(
@@ -565,6 +601,7 @@ def render_page(ctx):
         tagline=esc(ctx["tagline"]),
         status=_market_status(now_dt),
         mood=esc(ctx["synth"].get("mood", "")),
+        hsc=_hsc_banner(ctx.get("hsc"), now_dt),
         read=_reading_time(ctx),
         nav_links=nav_links,
         stamp=esc(ctx["stamp"]),
@@ -581,8 +618,16 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#14151a">
+<meta name="description" content="Chad's personal morning briefing — markets, mining, local & macro.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dispatch">
 <title>{title}</title>
 <script>try{{var t=localStorage.getItem('mcd-theme');if(t)document.documentElement.setAttribute('data-theme',t);}}catch(e){{}}</script>
 <style>{css}</style>
@@ -606,6 +651,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     <h1 class="greeting">{greeting}</h1>
     <p class="dateline">{date_full} <span class="read">· {read} min read</span></p>
     <p class="tagline">{tagline}</p>
+    {hsc}
     <p class="mast-mood">{mood}</p>
   </header>
   <main>{body}</main>
@@ -678,6 +724,17 @@ SCRIPTS = """<script>
     }).catch(function(){});
   }
   updateWeather(); setInterval(updateWeather, 600000);
+
+  // Days-to-HSC countdown (recompute from the viewer's clock).
+  function updateHsc(){
+    var el=document.getElementById('hsc-days'); var box=el&&el.closest('[data-hsc]'); if(!box) return;
+    var exam=new Date(box.getAttribute('data-hsc')); var days=Math.floor((exam-new Date())/86400000);
+    el.textContent = days<0?'Done':(days===0?'Today':(days===1?'Tomorrow':days+' days'));
+  }
+  updateHsc(); setInterval(updateHsc, 3600000);
+
+  // Installable PWA: cache the shell so it opens offline.
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
 
   var btn = document.getElementById('theme-btn');
   function effective(){
@@ -783,9 +840,15 @@ SCRIPTS = """<script>
           els.forEach(function(el){ applyRow(el, parseNum(q.last), parseNum(q.change), parseNum(q.high), parseNum(q.low)); });
         });
       });
-      if(got){ refresh(); var ind=document.getElementById('live-ind');
+      if(got){ refresh(); updateGoldAud(); var ind=document.getElementById('live-ind');
         if(ind){ ind.hidden=false; var t=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); ind.querySelector('.live-text').textContent='live · '+t; } }
     });
+  }
+  function updateGoldAud(){
+    var g=document.querySelector('[data-sym="@GC.1"] .q-price'), a=document.querySelector('[data-sym="AUD="] .q-price');
+    var el=document.getElementById('gold-aud'); if(!g||!a||!el) return;
+    var gv=parseNum(g.textContent), av=parseNum(a.textContent); if(!gv||!av) return;
+    var s=el.querySelector('strong'); if(s) s.textContent='A$'+(gv/av).toLocaleString('en-AU',{maximumFractionDigits:0});
   }
   updateQuotes();
   setInterval(updateQuotes, 60000);
@@ -1029,17 +1092,41 @@ a:hover{text-decoration:underline}
 .warn{display:none; color:var(--down); margin-left:5px; font-size:13px}
 .row.danger .warn{display:inline}
 
-/* Today's Focus */
-.focus-intent{margin:0 0 12px; font-size:17px; font-weight:600; color:var(--ink)}
-.focus-list{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:7px}
-.focus-list li{font-size:14.5px; color:var(--ink-soft); padding-left:4px}
-.focus-list li::marker{color:var(--accent); font-weight:800}
-.focus-quote{margin:16px 0 0; padding:12px 16px; background:var(--panel); border:1px solid var(--line);
-  border-left:3px solid var(--kicker); border-radius:10px; font-size:15px; font-style:italic; color:var(--ink)}
-.focus-who{display:block; margin-top:5px; font-style:normal; font-size:12.5px; font-weight:700; color:var(--ink-faint)}
+/* HSC countdown banner */
+.hsc{display:flex; align-items:baseline; gap:10px; margin:14px 0 0; padding:12px 16px;
+  background:linear-gradient(135deg,var(--accent-soft),transparent); border:1px solid var(--line);
+  border-left:3px solid var(--kicker); border-radius:12px}
+.hsc-big{font-size:22px; font-weight:800; letter-spacing:-.01em; color:var(--ink)}
+.hsc-label{font-size:13.5px; color:var(--ink-soft); font-weight:600}
 
 /* Port Stephens brief */
-.ps-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:14px}
+.ps-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
+.bf-row{padding:8px 0; border-top:1px solid var(--line)}
+.bf-row:first-of-type{border-top:none}
+.bf-k{display:block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint)}
+.bf-v{font-size:14px; color:var(--ink)}
+.bf-verdict{font-weight:800; padding:1px 8px; border-radius:999px; font-size:12.5px}
+.bf-verdict.bf-good{color:var(--up); background:color-mix(in srgb,var(--up) 16%,transparent)}
+.bf-verdict.bf-fair{color:var(--kicker); background:color-mix(in srgb,var(--kicker) 16%,transparent)}
+.bf-verdict.bf-poor{color:var(--down); background:color-mix(in srgb,var(--down) 16%,transparent)}
+.bf-sub{display:block; font-size:12px; color:var(--ink-faint); margin-top:2px}
+
+/* Gold in AUD chip */
+.gold-aud{font-size:12.5px; font-weight:600; color:var(--ink-soft)}
+.gold-aud strong{color:var(--kicker); font-variant-numeric:tabular-nums}
+
+/* Micro pick */
+.pick-card{background:linear-gradient(135deg,var(--accent-soft),var(--panel)); border:1px solid var(--line);
+  border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)}
+.pick-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.pick-name{font-size:18px; font-weight:780}
+.pick-sym{font-size:12px; font-weight:700; color:var(--ink-faint); letter-spacing:.04em}
+.pick-price{margin-left:auto; font-variant-numeric:tabular-nums; font-weight:720; font-size:15px; color:var(--ink)}
+.pick-price .mp-chg{font-size:12.5px}
+.pick-price.up .mp-chg{color:var(--up)} .pick-price.down .mp-chg{color:var(--down)} .pick-price.flat .mp-chg{color:var(--flat)}
+.pick-why{margin:10px 0 6px; font-size:14.5px; color:var(--ink); line-height:1.5}
+.pick-risk{margin:0; font-size:11.5px; color:var(--ink-faint); font-style:italic}
+.ps-grid-legacy{grid-template-columns:1.3fr 1fr}
 .ps-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow)}
 .wx-now{display:flex; align-items:center; gap:12px}
 .wx-emoji{font-size:34px; line-height:1}
@@ -1069,13 +1156,6 @@ a:hover{text-decoration:underline}
 .mw-price{font-variant-numeric:tabular-nums; font-weight:720; font-size:14.5px; color:var(--ink)}
 .mw-chg{font-variant-numeric:tabular-nums; font-size:12.5px; font-weight:650}
 .mw-row.up .mw-chg{color:var(--up)} .mw-row.down .mw-chg{color:var(--down)} .mw-row.flat .mw-chg{color:var(--flat)}
-
-/* Prado */
-.prado-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:6px 16px; box-shadow:var(--shadow)}
-.prado-row{display:grid; grid-template-columns:84px 1fr; gap:12px; padding:11px 0; border-top:1px solid var(--line)}
-.prado-row:first-child{border-top:none}
-.prado-k{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker); padding-top:2px}
-.prado-v{font-size:14.5px; color:var(--ink)}
 
 /* Highlights */
 .hl-tag{font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker);
