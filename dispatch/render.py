@@ -323,7 +323,7 @@ def _housing_card(economy):
         '<span class="rate-note">{c}</span></div>'.format(
             n=esc(r.get("name", "")), v=esc(r.get("value", "")), c=esc(r.get("change", "")))
         for r in rows)
-    asat = '<span class="card-note">as at {}</span>'.format(esc(h.get("as_at", ""))) if h.get("as_at") else ""
+    asat = '<span class="card-note">{}</span>'.format(esc(h.get("as_at", ""))) if h.get("as_at") else ""
     return ('<div class="eco-card"><div class="eco-head"><h3>AU housing</h3>{asat}</div>'
             '<div class="rate-list">{items}</div></div>'.format(asat=asat, items=items))
 
@@ -453,8 +453,8 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   <main>{body}</main>
   <footer class="foot">
     <div class="foot-nav">{nav_links}</div>
-    <p>Generated {stamp}. Static snapshot — figures reflect the moment of generation.</p>
-    <p class="foot-fine">Markets via CNBC &amp; Yahoo Finance · News via public RSS feeds · Informational only, not financial advice.</p>
+    <p>Built {stamp}. Market prices refresh live in your browser; news, themes and the economy figures are this morning's snapshot.</p>
+    <p class="foot-fine">Markets via CNBC &amp; Yahoo Finance · ASX data via ASX/Markit · News via public RSS feeds · Informational only, not financial advice.</p>
   </footer>
 </div>
 {scripts}
@@ -897,10 +897,10 @@ body{margin:0; background:var(--bg); color:var(--ink); font-family:-apple-system
 .btn:hover{border-color:var(--ink-faint)}
 .btn.on{background:var(--accent); color:#fff; border-color:transparent}
 .wrap{padding:0 12px 26px}
-#board{display:grid; gap:3px; background:var(--line); padding:3px; border-radius:12px; box-shadow:var(--shadow);
-  touch-action:manipulation; user-select:none; -webkit-user-select:none}
-.cell{width:min(7.6vw,30px); height:min(7.6vw,30px); display:flex; align-items:center; justify-content:center;
-  font-weight:800; font-size:min(4.4vw,16px); border-radius:5px; background:var(--panel-2); cursor:pointer;
+#board{display:grid; gap:2px; width:min(94vw,540px); background:var(--line); padding:2px; border-radius:12px;
+  box-shadow:var(--shadow); touch-action:manipulation; user-select:none; -webkit-user-select:none}
+.cell{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:clamp(11px,3vw,16px); border-radius:4px; background:var(--panel-2); cursor:pointer;
   font-variant-numeric:tabular-nums}
 .cell.rev{background:var(--panel); cursor:default}
 .cell.flag{background:var(--panel-2)}
