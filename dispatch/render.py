@@ -367,28 +367,6 @@ def _hsc_banner(hsc, now_dt):
                 iso=esc(hsc["when"]), big=big, label=label)
 
 
-def todays_focus_section(focus, now_dt, hsc=None):
-    if not focus and not hsc:
-        return ""
-    parts = []
-    banner = _hsc_banner(hsc, now_dt)
-    if banner:
-        parts.append(banner)
-    focus = focus or {}
-    if focus.get("intention"):
-        parts.append('<p class="focus-intent">{}</p>'.format(esc(focus["intention"])))
-    pris = focus.get("priorities") or []
-    if pris:
-        lis = "".join('<li>{}</li>'.format(esc(p)) for p in pris)
-        parts.append('<ol class="focus-list">{}</ol>'.format(lis))
-    quotes = focus.get("quotes") or []
-    if quotes:
-        q, who = quotes[now_dt.timetuple().tm_yday % len(quotes)]
-        parts.append('<p class="focus-quote">{}<span class="focus-who">— {}</span></p>'.format(
-            esc(q), esc(who)))
-    return _section("Today's Focus", "section-focus", "".join(parts))
-
-
 _FIRE_CLASS = {"moderate": "fd-mod", "high": "fd-high", "extreme": "fd-ext",
                "catastrophic": "fd-cat", "no rating": "fd-none"}
 
@@ -519,20 +497,6 @@ def micro_pick_section(pick, now_dt):
                     extra_head='<span class="hl-tag">high risk</span>')
 
 
-def prado_section(prado):
-    if not prado:
-        return ""
-    rows = []
-    for label, key in (("Status", "status"), ("Next up", "next"), ("On order", "on_order")):
-        if prado.get(key):
-            rows.append('<div class="prado-row"><span class="prado-k">{k}</span>'
-                        '<span class="prado-v">{v}</span></div>'.format(k=label, v=esc(prado[key])))
-    if not rows:
-        return ""
-    return _section("Prado Build Pulse", "section-prado",
-                    '<div class="prado-card">{}</div>'.format("".join(rows)))
-
-
 def highlights_section(stories):
     if not stories:
         return ""
@@ -598,7 +562,6 @@ def _reading_time(ctx):
 def render_page(ctx):
     now_dt = ctx["now_dt"]
     sections = [
-        todays_focus_section(ctx.get("focus"), now_dt, ctx.get("hsc")),
         local_section(ctx.get("local"), ctx.get("weather"), ctx.get("marine"), ctx.get("fuel")),
         market_snapshot(ctx["market_groups"]),
         mining_watch_section(ctx.get("mining_watch") or [], ctx.get("gold_aud")),
@@ -609,15 +572,14 @@ def render_page(ctx):
         highlights_section(ctx.get("highlights") or []),
         news_section(ctx["news_buckets"], ctx["categories"]),
         watchlist_section(ctx["watchlist"]),
-        prado_section(ctx.get("prado")),
     ]
     nav_meta = [
-        ("section-focus", "Focus"), ("section-local", "Local"),
+        ("section-local", "Local"),
         ("section-markets", "Markets"), ("section-mining", "Mining"),
         ("section-pick", "Pick"), ("section-themes", "Overnight"),
         ("section-watch", "Watch"), ("section-economy", "Economy"),
         ("section-highlights", "Highlights"), ("section-news", "News"),
-        ("section-watchlist", "Watchlist"), ("section-prado", "Prado"),
+        ("section-watchlist", "Watchlist"),
     ]
     present = {s.split('id="', 1)[1].split('"', 1)[0] for s in sections if s}
     nav_links = "".join(
@@ -639,6 +601,7 @@ def render_page(ctx):
         tagline=esc(ctx["tagline"]),
         status=_market_status(now_dt),
         mood=esc(ctx["synth"].get("mood", "")),
+        hsc=_hsc_banner(ctx.get("hsc"), now_dt),
         read=_reading_time(ctx),
         nav_links=nav_links,
         stamp=esc(ctx["stamp"]),
@@ -688,6 +651,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
     <h1 class="greeting">{greeting}</h1>
     <p class="dateline">{date_full} <span class="read">· {read} min read</span></p>
     <p class="tagline">{tagline}</p>
+    {hsc}
     <p class="mast-mood">{mood}</p>
   </header>
   <main>{body}</main>
@@ -1128,17 +1092,8 @@ a:hover{text-decoration:underline}
 .warn{display:none; color:var(--down); margin-left:5px; font-size:13px}
 .row.danger .warn{display:inline}
 
-/* Today's Focus */
-.focus-intent{margin:0 0 12px; font-size:17px; font-weight:600; color:var(--ink)}
-.focus-list{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:7px}
-.focus-list li{font-size:14.5px; color:var(--ink-soft); padding-left:4px}
-.focus-list li::marker{color:var(--accent); font-weight:800}
-.focus-quote{margin:16px 0 0; padding:12px 16px; background:var(--panel); border:1px solid var(--line);
-  border-left:3px solid var(--kicker); border-radius:10px; font-size:15px; font-style:italic; color:var(--ink)}
-.focus-who{display:block; margin-top:5px; font-style:normal; font-size:12.5px; font-weight:700; color:var(--ink-faint)}
-
 /* HSC countdown banner */
-.hsc{display:flex; align-items:baseline; gap:10px; margin:0 0 14px; padding:12px 16px;
+.hsc{display:flex; align-items:baseline; gap:10px; margin:14px 0 0; padding:12px 16px;
   background:linear-gradient(135deg,var(--accent-soft),transparent); border:1px solid var(--line);
   border-left:3px solid var(--kicker); border-radius:12px}
 .hsc-big{font-size:22px; font-weight:800; letter-spacing:-.01em; color:var(--ink)}
@@ -1201,13 +1156,6 @@ a:hover{text-decoration:underline}
 .mw-price{font-variant-numeric:tabular-nums; font-weight:720; font-size:14.5px; color:var(--ink)}
 .mw-chg{font-variant-numeric:tabular-nums; font-size:12.5px; font-weight:650}
 .mw-row.up .mw-chg{color:var(--up)} .mw-row.down .mw-chg{color:var(--down)} .mw-row.flat .mw-chg{color:var(--flat)}
-
-/* Prado */
-.prado-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:6px 16px; box-shadow:var(--shadow)}
-.prado-row{display:grid; grid-template-columns:84px 1fr; gap:12px; padding:11px 0; border-top:1px solid var(--line)}
-.prado-row:first-child{border-top:none}
-.prado-k{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker); padding-top:2px}
-.prado-v{font-size:14.5px; color:var(--ink)}
 
 /* Highlights */
 .hl-tag{font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker);

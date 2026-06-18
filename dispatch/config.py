@@ -296,7 +296,7 @@ LOCAL = {
     "fire_district": "Greater Hunter",
     "fire_rating": "Moderate",            # Moderate | High | Extreme | Catastrophic | No Rating
     "fire_advice": "Plan and prepare.",
-    "note": "Good conditions for outdoor work and Prado jobs today.",
+    "note": "Good conditions for outdoor work today.",
     # Birubi / Stockton Bight for beach-driving swell + wind (live).
     "beach_name": "Birubi · Stockton Bight",
     "beach_lat": -32.79, "beach_lon": 152.10,
@@ -339,28 +339,6 @@ MICRO_PICKS = [
 ]
 
 # ---------------------------------------------------------------------------
-# TODAYS_FOCUS — a short personal intention + a rotating quote. Edit freely;
-# the quote rotates by day so it changes daily.
-# ---------------------------------------------------------------------------
-TODAYS_FOCUS = {
-    "intention": "Two solid HSC study blocks, gym, and an hour on the Prado.",
-    "priorities": [
-        "HSC: 2× 50-min blocks (Maths + Physics), phone in the other room",
-        "Career: 20 min comparing Mining Eng entry vs RAN (gap year / ADFA)",
-        "Body + build: gym session, then diff-breather job on the Prado",
-    ],
-    "quotes": [
-        ("“Discipline equals freedom.”", "Jocko Willink"),
-        ("“The mine is only as good as the people who run it.”", "Mining proverb"),
-        ("“Amateurs talk strategy; professionals talk logistics.”", "Gen. Omar Bradley"),
-        ("“Hard times create strong men.”", "G. Michael Hopf"),
-        ("“The best time to plant a tree was 20 years ago. The second best is now.”", "Proverb"),
-        ("“Fortune favours the prepared mind.”", "Louis Pasteur"),
-        ("“Dig where the gold is — but only if you need the money.”", "Robert Kiyosaki"),
-    ],
-}
-
-# ---------------------------------------------------------------------------
 # MINING_WATCH — Chad's specific junior/resource names, with a one-line reason.
 # Symbols use the same notation as WATCHLIST (CNBC/ASX).
 # ---------------------------------------------------------------------------
@@ -372,24 +350,6 @@ MINING_WATCH = [
     ("ORI.AX", "Orica",            "Explosives bellwether — reads mining activity"),
     ("BHP.AX", "BHP Group",        "Iron ore + copper anchor for the sector"),
     ("RIO.AX", "Rio Tinto",        "Iron ore majors / Pilbara + Simandou"),
-]
-
-# ---------------------------------------------------------------------------
-# PRADO — the 2007 Prado 120 build pulse (light personal section).
-# ---------------------------------------------------------------------------
-PRADO = {
-    "status": "Daily-driver spec, mild touring setup. Running well.",
-    "next": "285/70R17 KO3s + speedo recalibration; then diff breathers.",
-    "on_order": "Diff-breather kit · sway-bar disconnects (researching exhaust).",
-}
-
-# ---------------------------------------------------------------------------
-# WATCH_PERSONAL — personal items merged into "What to Watch Today" alongside
-# the auto-generated market/news items.
-# ---------------------------------------------------------------------------
-WATCH_PERSONAL = [
-    {"title": "HSC study blocks", "detail": "Lock in two deep-work sessions before midday."},
-    {"title": "RFS availability", "detail": "Check the pager / brigade roster for the week."},
 ]
 
 # ---------------------------------------------------------------------------

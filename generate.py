@@ -140,10 +140,6 @@ def build(out_dir):
     synth = _safe("synthesis", lambda: synthesis.synthesize(
         cfg, market_groups, news_buckets, date_full),
         {"mood": "", "themes": [], "watch": [], "source": "fallback"})
-    # Merge Chad's personal "what to watch" items ahead of the auto ones.
-    personal = cfg.__dict__.get("WATCH_PERSONAL", [])
-    if personal:
-        synth["watch"] = (personal + synth.get("watch", []))[:max(6, len(personal))]
     print("  source=%s, %d themes, %d watch items" % (
         synth.get("source"), len(synth.get("themes", [])), len(synth.get("watch", []))))
 
@@ -168,9 +164,7 @@ def build(out_dir):
         "marine": marine,
         "fuel": fuel_info,
         "local": local,
-        "focus": cfg.__dict__.get("TODAYS_FOCUS"),
         "hsc": cfg.__dict__.get("HSC_EXAM"),
-        "prado": cfg.__dict__.get("PRADO"),
         "recession": recession,
         "economy": cfg.__dict__.get("ECONOMY"),
     }
