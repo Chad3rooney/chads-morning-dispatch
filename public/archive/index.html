@@ -235,17 +235,41 @@ a:hover{text-decoration:underline}
 .warn{display:none; color:var(--down); margin-left:5px; font-size:13px}
 .row.danger .warn{display:inline}
 
-/* Today's Focus */
-.focus-intent{margin:0 0 12px; font-size:17px; font-weight:600; color:var(--ink)}
-.focus-list{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:7px}
-.focus-list li{font-size:14.5px; color:var(--ink-soft); padding-left:4px}
-.focus-list li::marker{color:var(--accent); font-weight:800}
-.focus-quote{margin:16px 0 0; padding:12px 16px; background:var(--panel); border:1px solid var(--line);
-  border-left:3px solid var(--kicker); border-radius:10px; font-size:15px; font-style:italic; color:var(--ink)}
-.focus-who{display:block; margin-top:5px; font-style:normal; font-size:12.5px; font-weight:700; color:var(--ink-faint)}
+/* HSC countdown banner */
+.hsc{display:flex; align-items:baseline; gap:10px; margin:14px 0 0; padding:12px 16px;
+  background:linear-gradient(135deg,var(--accent-soft),transparent); border:1px solid var(--line);
+  border-left:3px solid var(--kicker); border-radius:12px}
+.hsc-big{font-size:22px; font-weight:800; letter-spacing:-.01em; color:var(--ink)}
+.hsc-label{font-size:13.5px; color:var(--ink-soft); font-weight:600}
 
 /* Port Stephens brief */
-.ps-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:14px}
+.ps-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
+.bf-row{padding:8px 0; border-top:1px solid var(--line)}
+.bf-row:first-of-type{border-top:none}
+.bf-k{display:block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint)}
+.bf-v{font-size:14px; color:var(--ink)}
+.bf-verdict{font-weight:800; padding:1px 8px; border-radius:999px; font-size:12.5px}
+.bf-verdict.bf-good{color:var(--up); background:color-mix(in srgb,var(--up) 16%,transparent)}
+.bf-verdict.bf-fair{color:var(--kicker); background:color-mix(in srgb,var(--kicker) 16%,transparent)}
+.bf-verdict.bf-poor{color:var(--down); background:color-mix(in srgb,var(--down) 16%,transparent)}
+.bf-sub{display:block; font-size:12px; color:var(--ink-faint); margin-top:2px}
+
+/* Gold in AUD chip */
+.gold-aud{font-size:12.5px; font-weight:600; color:var(--ink-soft)}
+.gold-aud strong{color:var(--kicker); font-variant-numeric:tabular-nums}
+
+/* Micro pick */
+.pick-card{background:linear-gradient(135deg,var(--accent-soft),var(--panel)); border:1px solid var(--line);
+  border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)}
+.pick-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.pick-name{font-size:18px; font-weight:780}
+.pick-sym{font-size:12px; font-weight:700; color:var(--ink-faint); letter-spacing:.04em}
+.pick-price{margin-left:auto; font-variant-numeric:tabular-nums; font-weight:720; font-size:15px; color:var(--ink)}
+.pick-price .mp-chg{font-size:12.5px}
+.pick-price.up .mp-chg{color:var(--up)} .pick-price.down .mp-chg{color:var(--down)} .pick-price.flat .mp-chg{color:var(--flat)}
+.pick-why{margin:10px 0 6px; font-size:14.5px; color:var(--ink); line-height:1.5}
+.pick-risk{margin:0; font-size:11.5px; color:var(--ink-faint); font-style:italic}
+.ps-grid-legacy{grid-template-columns:1.3fr 1fr}
 .ps-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow)}
 .wx-now{display:flex; align-items:center; gap:12px}
 .wx-emoji{font-size:34px; line-height:1}
@@ -275,13 +299,6 @@ a:hover{text-decoration:underline}
 .mw-price{font-variant-numeric:tabular-nums; font-weight:720; font-size:14.5px; color:var(--ink)}
 .mw-chg{font-variant-numeric:tabular-nums; font-size:12.5px; font-weight:650}
 .mw-row.up .mw-chg{color:var(--up)} .mw-row.down .mw-chg{color:var(--down)} .mw-row.flat .mw-chg{color:var(--flat)}
-
-/* Prado */
-.prado-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:6px 16px; box-shadow:var(--shadow)}
-.prado-row{display:grid; grid-template-columns:84px 1fr; gap:12px; padding:11px 0; border-top:1px solid var(--line)}
-.prado-row:first-child{border-top:none}
-.prado-k{font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker); padding-top:2px}
-.prado-v{font-size:14.5px; color:var(--ink)}
 
 /* Highlights */
 .hl-tag{font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker);
