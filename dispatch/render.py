@@ -270,7 +270,12 @@ def _section(title, anchor, body, extra_head=""):
 
 
 def _market_status(now_dt):
-    """Subtle open/closed pills based on the AEST clock."""
+    """Server-rendered open/closed pills (a no-JS fallback for generation time).
+
+    These are recomputed live in the browser from the viewer's current AEST
+    clock — see SCRIPTS — because the page is a static morning snapshot and the
+    real market status changes through the day after it's built.
+    """
     wd = now_dt.weekday()
     h = now_dt.hour + now_dt.minute / 60.0
     asx_open = (wd < 5) and (10.0 <= h < 16.0)
@@ -356,7 +361,7 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
   <header class="masthead">
     <div class="mast-top">
       <span class="kicker">{title}</span>
-      <div class="status">{status}</div>
+      <div class="status" id="market-status">{status}</div>
     </div>
     <h1 class="greeting">{greeting}</h1>
     <p class="dateline">{date_full} <span class="read">· {read} min read</span></p>
@@ -377,6 +382,30 @@ PAGE_TEMPLATE = """<!DOCTYPE html>
 
 SCRIPTS = """<script>
 (function(){
+  // --- Live market-status pills (recomputed from the viewer's AEST clock) ---
+  // The page is a static morning snapshot, so the baked-in status goes stale
+  // during the day. Recompute it locally — no network, still fully static.
+  function updateStatus(){
+    var el = document.getElementById('market-status');
+    if (!el) return;
+    var syd;
+    try { syd = new Date(new Date().toLocaleString('en-US', {timeZone:'Australia/Sydney'})); }
+    catch(e){ return; }                       // leave the server fallback in place
+    var wd = syd.getDay();                     // 0=Sun .. 6=Sat
+    var h = syd.getHours() + syd.getMinutes()/60;
+    var asxOpen = wd >= 1 && wd <= 5 && h >= 10 && h < 16;            // 10:00–16:00 Syd, Mon–Fri
+    var usLive  = !(wd === 6 || wd === 0 || (wd === 1 && h < 8));      // CME equity futures ~Mon 8am–Sat Syd
+    var pills = [
+      [usLive ? 'US futures live' : 'US futures closed', usLive ? 'live' : 'closed'],
+      [asxOpen ? 'ASX open' : 'ASX closed', asxOpen ? 'live' : 'closed']
+    ];
+    el.innerHTML = pills.map(function(p){
+      return '<span class="pill ' + p[1] + '"><span class="dot"></span>' + p[0] + '</span>';
+    }).join('');
+  }
+  updateStatus();
+  setInterval(updateStatus, 60000);            // keep it correct if the page stays open
+
   var btn = document.getElementById('theme-btn');
   function effective(){
     var set = document.documentElement.getAttribute('data-theme');
