@@ -7,7 +7,7 @@
     "name": "FTSE 100",
     "prev_close": 10572.240000000002,
     "price": 10600.37,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 10934.94,
     "year_low": 8926.55
   },
@@ -19,7 +19,7 @@
     "name": "Germany DAX",
     "prev_close": 24915.489999999998,
     "price": 24830.98,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 25900.1,
     "year_low": 21863.81
   },
@@ -31,7 +31,7 @@
     "name": "Hang Seng Index",
     "prev_close": 25008.600000000002,
     "price": 24562.24,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 28056.1,
     "year_low": 22518.0
   },
@@ -43,7 +43,7 @@
     "name": "Nikkei 225 Index",
     "prev_close": 66835.54000000001,
     "price": 64141.12,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 72831.73,
     "year_low": 39288.9
   },
@@ -55,7 +55,7 @@
     "name": "Iron Ore 62% N China (Jul'26)",
     "prev_close": 98.81,
     "price": 98.81,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 98.81,
     "year_low": 0.0
   },
@@ -67,7 +67,7 @@
     "name": "Apple Inc",
     "prev_close": 333.26,
     "price": 333.74,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 334.99,
     "year_low": 201.5
   },
@@ -79,7 +79,7 @@
     "name": "Australia 10 Year Bond",
     "prev_close": 4.906,
     "price": 4.909,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 5.18,
     "year_low": 4.1
   },
@@ -91,7 +91,7 @@
     "name": "Australia 2 Year Bond",
     "prev_close": 4.522,
     "price": 4.522,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 4.92,
     "year_low": 3.24
   },
@@ -103,7 +103,7 @@
     "name": "AUD/USD",
     "prev_close": 0.6996,
     "price": 0.698,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 0.73,
     "year_low": 0.67
   },
@@ -115,7 +115,7 @@
     "name": "ANTIPA MINERALS LIMITED",
     "prev_close": 0.59,
     "price": 0.5750000000000001,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": null,
     "year_low": null
   },
@@ -127,7 +127,7 @@
     "name": "Black Horse Mining Ltd",
     "prev_close": 0.2,
     "price": 0.2,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 0.68,
     "year_low": 0.18
   },
@@ -139,7 +139,7 @@
     "name": "BHP Group Ltd",
     "prev_close": 59.14,
     "price": 57.54,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 65.98,
     "year_low": 39.18
   },
@@ -149,9 +149,9 @@
     "day_low": 63854.13,
     "day_open": 64091.12,
     "name": "Bitcoin/US Dollar FX Spot Rate",
-    "prev_close": 64098.59,
-    "price": 64500.25,
-    "ts": "2026-07-18T19:36:05Z",
+    "prev_close": 64098.590000000004,
+    "price": 64540.87,
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 97866.77,
     "year_low": 57775.84
   },
@@ -163,7 +163,7 @@
     "name": "ICE Brent Crude (Sep'26)",
     "prev_close": 88.1,
     "price": 88.1,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 126.41,
     "year_low": 58.72
   },
@@ -175,7 +175,7 @@
     "name": "Commonwealth Bank of Australia",
     "prev_close": 173.13,
     "price": 171.78,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 185.59,
     "year_low": 146.98
   },
@@ -187,7 +187,7 @@
     "name": "WTI Crude (Aug'26)",
     "prev_close": 78.95,
     "price": 82.47,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 119.48,
     "year_low": 54.98
   },
@@ -199,7 +199,7 @@
     "name": "CSL Ltd",
     "prev_close": 121.94999999999999,
     "price": 123.32,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 275.79,
     "year_low": 90.0
   },
@@ -211,7 +211,7 @@
     "name": "Bund 10-YR",
     "prev_close": 3.1241000000000003,
     "price": 3.1417,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 3.2,
     "year_low": 2.52
   },
@@ -223,7 +223,7 @@
     "name": "ICE U.S. Dollar Index",
     "prev_close": 100.76299999999999,
     "price": 100.755,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 101.8,
     "year_low": 95.55
   },
@@ -235,7 +235,7 @@
     "name": "S&P 500 Index",
     "prev_close": 7533.7699999999995,
     "price": 7457.69,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 7620.9,
     "year_low": 6201.59
   },
@@ -246,8 +246,8 @@
     "day_open": 1841.92,
     "name": "Ether/USD Coinbase",
     "prev_close": 1842.41,
-    "price": 1857.17,
-    "ts": "2026-07-18T19:36:05Z",
+    "price": 1856.38,
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 4954.52,
     "year_low": 1506.8
   },
@@ -259,7 +259,7 @@
     "name": "EUR/USD",
     "prev_close": 1.1439,
     "price": 1.1439,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 1.21,
     "year_low": 1.13
   },
@@ -271,7 +271,7 @@
     "name": "Fortescue Ltd",
     "prev_close": 18.87,
     "price": 18.87,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 23.38,
     "year_low": 16.94
   },
@@ -282,8 +282,8 @@
     "day_open": 4.9509,
     "name": "British 10 Year Gilt",
     "prev_close": 4.9527,
-    "price": 4.9722,
-    "ts": "2026-07-18T19:36:05Z",
+    "price": 4.9847,
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 5.2,
     "year_low": 4.23
   },
@@ -295,7 +295,7 @@
     "name": "GBP/USD",
     "prev_close": 1.3476,
     "price": 1.3453,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 1.39,
     "year_low": 1.31
   },
@@ -307,7 +307,7 @@
     "name": "Gold COMEX (Aug'26)",
     "prev_close": 3992.1,
     "price": 4023.0,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 5586.2,
     "year_low": 3263.9
   },
@@ -319,7 +319,7 @@
     "name": "Copper (Sep'26)",
     "prev_close": 6.3420000000000005,
     "price": 6.2705,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 6.7,
     "year_low": 4.33
   },
@@ -331,7 +331,7 @@
     "name": "Japan 10 Year Treasury",
     "prev_close": 2.714,
     "price": 2.692,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 2.9,
     "year_low": 1.46
   },
@@ -343,7 +343,7 @@
     "name": "Lynas Rare Earths Ltd",
     "prev_close": 16.25,
     "price": 15.89,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 22.37,
     "year_low": 9.93
   },
@@ -355,7 +355,7 @@
     "name": "Mineral Resources Ltd",
     "prev_close": 58.300000000000004,
     "price": 56.78,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 74.94,
     "year_low": 27.65
   },
@@ -367,7 +367,7 @@
     "name": "Macquarie Group Ltd",
     "prev_close": 256.73,
     "price": 258.41,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 260.57,
     "year_low": 187.31
   },
@@ -379,7 +379,7 @@
     "name": "Microsoft Corp",
     "prev_close": 401.09999999999997,
     "price": 393.82,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 555.45,
     "year_low": 349.2
   },
@@ -391,7 +391,7 @@
     "name": "Natural Gas (Aug'26)",
     "prev_close": 2.858,
     "price": 2.916,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 7.83,
     "year_low": 0.0
   },
@@ -403,7 +403,7 @@
     "name": "NASDAQ 100 Index",
     "prev_close": 29025.77,
     "price": 28592.659,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 30762.2,
     "year_low": 22669.37
   },
@@ -415,7 +415,7 @@
     "name": "Northern Star Resources Ltd",
     "prev_close": 20.069999999999997,
     "price": 19.24,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 31.96,
     "year_low": 15.3
   },
@@ -427,7 +427,7 @@
     "name": "NVIDIA Corp",
     "prev_close": 207.4,
     "price": 202.81,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 236.54,
     "year_low": 164.07
   },
@@ -439,7 +439,7 @@
     "name": "NZD/USD",
     "prev_close": 0.584,
     "price": 0.584,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 0.61,
     "year_low": 0.56
   },
@@ -451,7 +451,7 @@
     "name": "Orica Ltd",
     "prev_close": 23.25,
     "price": 22.95,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 26.47,
     "year_low": 18.58
   },
@@ -463,7 +463,7 @@
     "name": "Palladium (Sep'26)",
     "prev_close": 1272.3,
     "price": 1250.0,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 2195.5,
     "year_low": 1074.5
   },
@@ -475,7 +475,7 @@
     "name": "Platinum (Oct'26)",
     "prev_close": 1642.5,
     "price": 1603.5,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 2925.0,
     "year_low": 1271.1
   },
@@ -487,7 +487,7 @@
     "name": "PLS Group Ltd",
     "prev_close": 4.47,
     "price": 4.33,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 6.81,
     "year_low": 1.58
   },
@@ -499,7 +499,7 @@
     "name": "Rio Tinto Ltd",
     "prev_close": 164.89,
     "price": 160.95,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 195.84,
     "year_low": 110.31
   },
@@ -511,7 +511,7 @@
     "name": "Russell 2000 Index",
     "prev_close": 2974.567,
     "price": 2962.217,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 3046.59,
     "year_low": 2143.43
   },
@@ -523,7 +523,7 @@
     "name": "Sunshine Metals Ltd",
     "prev_close": 0.028999999999999998,
     "price": 0.027,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 0.05,
     "year_low": 0.01
   },
@@ -535,7 +535,7 @@
     "name": "Silver COMEX (Sep'26)",
     "prev_close": 56.187,
     "price": 56.22,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 121.79,
     "year_low": 36.28
   },
@@ -547,7 +547,7 @@
     "name": "Santos Ltd",
     "prev_close": 7.54,
     "price": 7.68,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 8.24,
     "year_low": 5.9
   },
@@ -559,7 +559,7 @@
     "name": "Tennant Minerals Ltd",
     "prev_close": 0.008,
     "price": 0.007,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 0.01,
     "year_low": 0.01
   },
@@ -571,7 +571,7 @@
     "name": "Tesla Inc",
     "prev_close": 391.06,
     "price": 380.84,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 498.83,
     "year_low": 297.82
   },
@@ -583,7 +583,7 @@
     "name": "Tesoro Gold Ltd",
     "prev_close": 0.91,
     "price": 0.88,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 1.44,
     "year_low": 0.39
   },
@@ -595,7 +595,7 @@
     "name": "U.S. 2 Year Treasury",
     "prev_close": 4.156,
     "price": 4.183,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 4.3,
     "year_low": 3.37
   },
@@ -607,7 +607,7 @@
     "name": "U.S. 30 Year Treasury",
     "prev_close": 5.097,
     "price": 5.073,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 5.2,
     "year_low": 4.52
   },
@@ -619,7 +619,7 @@
     "name": "USD/JPY",
     "prev_close": 162.38,
     "price": 162.39,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 162.83,
     "year_low": 152.1
   },
@@ -631,7 +631,7 @@
     "name": "Woodside Energy Group Ltd",
     "prev_close": 29.490000000000002,
     "price": 30.46,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 35.82,
     "year_low": 21.96
   },
@@ -643,7 +643,7 @@
     "name": "Dow Jones Industrial Average",
     "prev_close": 52552.97,
     "price": 52146.42,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 53289.3,
     "year_low": 43340.68
   },
@@ -655,7 +655,7 @@
     "name": "Australia All Ordinaries",
     "prev_close": 9036.9,
     "price": 8978.8,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 9436.2,
     "year_low": 8454.9
   },
@@ -667,7 +667,7 @@
     "name": "S&P/ASX 200",
     "prev_close": 8840.7,
     "price": 8796.7,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 9202.9,
     "year_low": 8262.4
   },
@@ -679,7 +679,7 @@
     "name": "U.S. 10 Year Treasury",
     "prev_close": 4.569,
     "price": 4.551,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 4.69,
     "year_low": 3.93
   },
@@ -691,7 +691,7 @@
     "name": "CBOE Volatility Index",
     "prev_close": 16.73,
     "price": 18.77,
-    "ts": "2026-07-18T19:36:05Z",
+    "ts": "2026-07-18T20:09:22Z",
     "year_high": 35.3,
     "year_low": 13.38
   }
