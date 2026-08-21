@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#14151a">
+<meta name="description" content="Chad's personal morning briefing — markets, mining, local & macro.">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dispatch">
+<title>Chad&#x27;s Morning Dispatch</title>
+<script>try{var t=localStorage.getItem('mcd-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<style>
+:root{
+  --bg:#f4f2ec; --bg-2:#efece4; --panel:#fffdf9; --panel-2:#faf7f0;
+  --ink:#1b1c21; --ink-soft:#52545d; --ink-faint:#8b8d97; --line:#e7e2d8;
+  --accent:#2f6f5e; --accent-soft:#e3efe9; --kicker:#9a6a3c;
+  --up:#1c7d54; --down:#c0392b; --flat:#8b8d97;
+  --shadow:0 1px 2px rgba(40,35,25,.06),0 8px 24px rgba(40,35,25,.05);
+}
+[data-theme="dark"]{
+  --bg:#121317; --bg-2:#15171d; --panel:#1b1d24; --panel-2:#21242c;
+  --ink:#eef0f4; --ink-soft:#aab0bd; --ink-faint:#787d89; --line:#292c35;
+  --accent:#5cb9a0; --accent-soft:#1e3b35; --kicker:#d2a36c;
+  --up:#49c98f; --down:#f06d5d; --flat:#787d89;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px rgba(0,0,0,.30);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme]){
+  --bg:#121317; --bg-2:#15171d; --panel:#1b1d24; --panel-2:#21242c;
+  --ink:#eef0f4; --ink-soft:#aab0bd; --ink-faint:#787d89; --line:#292c35;
+  --accent:#5cb9a0; --accent-soft:#1e3b35; --kicker:#d2a36c;
+  --up:#49c98f; --down:#f06d5d; --flat:#787d89;
+  --shadow:0 1px 2px rgba(0,0,0,.35),0 12px 32px rgba(0,0,0,.30);
+}}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,"Inter",sans-serif;
+  line-height:1.55; font-size:16px; letter-spacing:.1px;
+  transition:background .25s ease, color .25s ease;
+}
+.wrap{max-width:960px; margin:0 auto; padding:26px 20px 64px}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+.section{scroll-margin-top:64px}
+
+/* Sticky nav */
+.topnav{position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:14px;
+  padding:9px 20px; background:color-mix(in srgb, var(--bg) 86%, transparent);
+  -webkit-backdrop-filter:saturate(160%) blur(12px); backdrop-filter:saturate(160%) blur(12px);
+  border-bottom:1px solid var(--line)}
+.nav-brand{font-weight:800; font-size:13px; letter-spacing:.04em; color:var(--ink); flex:none}
+.nav-links{display:flex; gap:4px; overflow-x:auto; flex:1; scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{font-size:12.5px; font-weight:600; color:var(--ink-soft); padding:5px 10px;
+  border-radius:8px; white-space:nowrap}
+.nav-links a:hover{color:var(--ink); background:var(--panel-2); text-decoration:none}
+.theme-btn{flex:none; display:inline-flex; align-items:center; gap:6px; cursor:pointer;
+  font:inherit; font-size:12.5px; font-weight:600; color:var(--ink-soft);
+  background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:5px 12px;
+  transition:color .2s, border-color .2s}
+.theme-btn:hover{color:var(--ink); border-color:var(--ink-faint)}
+.theme-btn .t-icon{font-size:13px; line-height:1}
+.nav-game{flex:none; font-size:12.5px; font-weight:700; color:#fff;
+  background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 60%,var(--kicker)));
+  border-radius:999px; padding:6px 13px; white-space:nowrap; box-shadow:var(--shadow)}
+.nav-game:hover{text-decoration:none; filter:brightness(1.08); transform:translateY(-1px)}
+
+/* Masthead */
+.masthead{padding:24px 0 22px; border-bottom:1px solid var(--line); margin-bottom:26px}
+.mast-top{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap}
+.kicker{font-size:12px; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--kicker)}
+.status{display:flex; gap:8px; flex-wrap:wrap}
+.pill{display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:600;
+  color:var(--ink-soft); background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px 10px}
+.pill .dot{width:7px; height:7px; border-radius:50%; background:var(--flat)}
+.pill.live .dot{background:var(--up); box-shadow:0 0 0 3px color-mix(in srgb,var(--up) 22%,transparent)}
+.pill.closed .dot{background:var(--ink-faint)}
+.greeting{font-size:33px; line-height:1.12; margin:18px 0 6px; font-weight:780; letter-spacing:-.022em}
+.dateline{margin:0; color:var(--ink-soft); font-size:15px; font-weight:600}
+.dateline .read{color:var(--ink-faint); font-weight:500}
+.tagline{margin:7px 0 0; color:var(--ink-faint); font-size:13.5px}
+.mast-mood{margin:14px 0 0; font-size:16px; color:var(--ink); font-weight:560;
+  padding:12px 16px; background:var(--accent-soft); border-radius:12px; border:1px solid var(--line)}
+.mast-mood:empty{display:none}
+
+/* Sections */
+.section{margin:38px 0}
+.section-head{display:flex; align-items:baseline; gap:10px; margin:0 0 16px}
+.section-head h2{font-size:13px; font-weight:750; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--ink-soft); margin:0}
+.badge-fallback{font-size:10.5px; font-weight:600; color:var(--ink-faint);
+  border:1px solid var(--line); border-radius:6px; padding:1px 7px}
+.breadth{font-size:12px; font-weight:700; font-variant-numeric:tabular-nums}
+.breadth .up{color:var(--up)} .breadth .down{color:var(--down)}
+
+/* Movers strip */
+.movers{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:16px}
+.movers-label{font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+.mover{display:inline-flex; align-items:center; gap:7px; font-size:12.5px; font-weight:650;
+  background:var(--panel); border:1px solid var(--line); border-radius:999px; padding:4px 11px; box-shadow:var(--shadow)}
+.mover-name{color:var(--ink)}
+.mover.up .mover-pct{color:var(--up)} .mover.down .mover-pct{color:var(--down)} .mover.flat .mover-pct{color:var(--flat)}
+.mover-pct{font-variant-numeric:tabular-nums}
+
+/* Market grid */
+.market-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(248px,1fr)); gap:14px}
+.market-card{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  padding:16px 16px 10px; box-shadow:var(--shadow)}
+.card-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:6px}
+.card-head h3{font-size:14.5px; margin:0; font-weight:730}
+.card-note{font-size:11px; color:var(--ink-faint)}
+.rows{display:flex; flex-direction:column}
+.row{padding:10px 0; border-top:1px solid var(--line)}
+.row:first-child{border-top:none}
+.row-top{display:flex; align-items:baseline; justify-content:space-between; gap:10px}
+.q-label{font-size:14px; color:var(--ink-soft); font-weight:580}
+.q-asof{display:block; font-size:10px; font-weight:500; color:var(--ink-faint); margin-top:1px}
+.q-price{font-variant-numeric:tabular-nums; font-weight:700; font-size:15px; color:var(--ink)}
+.row-bot{display:flex; align-items:center; gap:10px; margin-top:5px}
+.q-chg{font-variant-numeric:tabular-nums; font-size:12px; font-weight:650; white-space:nowrap; margin-left:auto}
+.row.up .q-chg{color:var(--up)} .row.down .q-chg{color:var(--down)} .row.flat .q-chg{color:var(--flat)}
+.q-pct{opacity:.95}
+.q-unavail,.wl-unavail{font-size:12px; color:var(--ink-faint); font-style:italic}
+.row.muted .q-label{color:var(--ink-faint)}
+.is-stale .q-price{opacity:.85}
+/* day-range micro-bar */
+.range{flex:1; min-width:34px; max-width:130px}
+.range--none{visibility:hidden}
+.range-track{position:relative; height:4px; border-radius:3px;
+  background:linear-gradient(90deg,var(--line),var(--line))}
+.range-dot{position:absolute; top:50%; width:8px; height:8px; border-radius:50%;
+  transform:translate(-50%,-50%); background:var(--flat); border:2px solid var(--panel)}
+.range.up .range-dot{background:var(--up)} .range.down .range-dot{background:var(--down)}
+
+/* Themes */
+.mood{font-size:16.5px; color:var(--ink); margin:0 0 18px; font-weight:560;
+  padding-left:14px; border-left:3px solid var(--accent)}
+.themes{display:flex; flex-direction:column; gap:2px}
+.theme{display:flex; gap:14px; padding:16px 0; border-top:1px solid var(--line)}
+.theme:first-child{border-top:none}
+.theme-num{flex:none; width:27px; height:27px; border-radius:50%; background:var(--accent);
+  color:#fff; font-size:13px; font-weight:700; display:flex; align-items:center; justify-content:center}
+.theme-kicker{display:block; font-size:10.5px; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--kicker); margin-bottom:3px}
+.theme-body h4{margin:0 0 5px; font-size:16.5px; font-weight:720; line-height:1.3}
+.theme-body p{margin:0; color:var(--ink-soft); font-size:14.5px}
+
+/* Watch */
+.watch-list{list-style:none; margin:0; padding:0; display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(270px,1fr)); gap:12px}
+.watch-list li{display:flex; gap:11px; align-items:flex-start; background:var(--panel);
+  border:1px solid var(--line); border-radius:13px; padding:14px 15px; box-shadow:var(--shadow)}
+.watch-dot{flex:none; width:8px; height:8px; border-radius:50%; background:var(--kicker); margin-top:7px}
+.watch-text{display:flex; flex-direction:column; gap:3px}
+.watch-text strong{font-size:14.5px; font-weight:680}
+.watch-detail{font-size:13px; color:var(--ink-soft)}
+
+/* News */
+.news-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(330px,1fr)); gap:14px 30px}
+.news-cat-title{font-size:14px; font-weight:760; margin:0 0 8px; padding-bottom:8px;
+  border-bottom:2px solid var(--line); color:var(--ink); display:flex; align-items:center; gap:8px;
+  text-transform:uppercase; letter-spacing:.06em}
+.news-count{font-size:11px; font-weight:600; color:var(--ink-faint); background:var(--panel-2);
+  border-radius:999px; padding:1px 8px; letter-spacing:0}
+.stories{display:flex; flex-direction:column}
+.story{padding:13px 0; border-top:1px solid var(--line)}
+.story:first-child{border-top:none}
+.story-title{margin:0 0 4px; font-size:15px; font-weight:640; line-height:1.34}
+.story--lead .story-title{font-size:16.5px; font-weight:720}
+.story-title a{color:var(--ink)} .story-title a:hover{color:var(--accent)}
+.ext{font-size:11px; color:var(--ink-faint); font-weight:400; margin-left:4px}
+.story-sum{margin:0 0 6px; color:var(--ink-soft); font-size:13.5px; line-height:1.5}
+.story-meta{display:flex; gap:8px; align-items:center; font-size:11px; font-weight:600;
+  letter-spacing:.03em; text-transform:uppercase}
+.story-meta .src{color:var(--accent)}
+.story-meta .age{color:var(--ink-faint)}
+
+/* Watchlist */
+.watchlist{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  overflow:hidden; box-shadow:var(--shadow)}
+.wl-row{display:grid; grid-template-columns:1fr auto auto auto; gap:12px; align-items:center;
+  padding:12px 16px; border-top:1px solid var(--line); transition:background .15s}
+.wl-row:first-child{border-top:none}
+.wl-row:hover{background:var(--panel-2)}
+.wl-name{font-weight:620; font-size:14.5px}
+.wl-price{font-variant-numeric:tabular-nums; font-weight:700; text-align:right; color:var(--ink)}
+.wl-chg,.wl-pct{font-variant-numeric:tabular-nums; font-size:13px; font-weight:650; text-align:right; min-width:66px}
+.wl-row.up .wl-chg,.wl-row.up .wl-pct{color:var(--up)}
+.wl-row.down .wl-chg,.wl-row.down .wl-pct{color:var(--down)}
+.wl-row.flat .wl-chg,.wl-row.flat .wl-pct{color:var(--flat)}
+.wl-row.muted{grid-template-columns:1fr auto}
+
+/* Live indicator + price flash */
+.live-ind{display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:700;
+  letter-spacing:.06em; text-transform:uppercase; color:var(--up)}
+.live-pulse{width:8px; height:8px; border-radius:50%; background:var(--up); position:relative}
+.live-pulse::after{content:""; position:absolute; inset:0; border-radius:50%; background:var(--up);
+  animation:pulse 1.8s ease-out infinite}
+@keyframes pulse{0%{transform:scale(1);opacity:.7} 100%{transform:scale(3);opacity:0}}
+@keyframes flashUp{0%{background:color-mix(in srgb,var(--up) 26%,transparent)} 100%{background:transparent}}
+@keyframes flashDown{0%{background:color-mix(in srgb,var(--down) 26%,transparent)} 100%{background:transparent}}
+.row.flash-up,.wl-row.flash-up{animation:flashUp .8s ease-out}
+.row.flash-down,.wl-row.flash-down{animation:flashDown .8s ease-out}
+.q-price,.wl-price,.q-chg,.wl-chg,.wl-pct{transition:color .25s}
+
+/* Price-sensitive announcement flag */
+.sens{color:var(--down); font-weight:800; margin-left:4px; cursor:help; font-size:15px; vertical-align:top}
+
+/* Economy & Rates */
+.eco-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+.eco-card{background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  padding:16px 16px 14px; box-shadow:var(--shadow)}
+.eco-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:12px}
+.eco-head h3{font-size:14.5px; margin:0; font-weight:730}
+.rec-label{font-size:12px; font-weight:800; padding:2px 10px; border-radius:999px}
+.recession.low .rec-label{color:var(--up); background:color-mix(in srgb,var(--up) 16%,transparent)}
+.recession.watch .rec-label{color:var(--kicker); background:color-mix(in srgb,var(--kicker) 16%,transparent)}
+.recession.moderate .rec-label{color:#d08a2c; background:color-mix(in srgb,#d08a2c 16%,transparent)}
+.recession.high .rec-label{color:var(--down); background:color-mix(in srgb,var(--down) 16%,transparent)}
+.gauge{position:relative; height:10px; border-radius:6px; margin:6px 0 4px;
+  background:linear-gradient(90deg,var(--up) 0%,#e0b94e 52%,var(--down) 100%)}
+.gauge-marker{position:absolute; top:50%; width:4px; height:18px; border-radius:3px;
+  background:var(--ink); transform:translate(-50%,-50%); box-shadow:0 0 0 2px var(--panel)}
+.gauge-scale{display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-faint); font-weight:600}
+.eco-detail{margin:10px 0 6px; font-size:13.5px; color:var(--ink-soft); line-height:1.5}
+.eco-fine{margin:0; font-size:11px; color:var(--ink-faint); font-variant-numeric:tabular-nums}
+.rate-list{display:flex; flex-direction:column}
+.rate-row{display:grid; grid-template-columns:1fr auto; gap:4px 12px; padding:9px 0; border-top:1px solid var(--line)}
+.rate-row:first-child{border-top:none}
+.rate-name{font-size:14px; font-weight:600; color:var(--ink)}
+.rate-val{font-size:14.5px; font-weight:730; text-align:right; font-variant-numeric:tabular-nums; color:var(--ink)}
+.rate-note{grid-column:1/-1; font-size:11.5px; color:var(--ink-faint); margin-top:-2px}
+
+/* Footer */
+.foot{margin-top:52px; padding-top:22px; border-top:1px solid var(--line); color:var(--ink-faint); font-size:12.5px}
+.foot-nav{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px}
+.foot-nav a{font-size:12.5px; font-weight:600; color:var(--ink-soft)}
+.foot p{margin:0 0 5px}
+.foot-fine{font-size:11.5px}
+
+/* Bond danger */
+.row.danger{background:color-mix(in srgb,var(--down) 12%,transparent); border-radius:8px; margin:0 -8px; padding-left:8px; padding-right:8px}
+.row.danger .q-price{color:var(--down)}
+.warn{display:none; color:var(--down); margin-left:5px; font-size:13px}
+.row.danger .warn{display:inline}
+
+/* HSC countdown banner */
+.hsc{display:flex; align-items:baseline; gap:10px; margin:14px 0 0; padding:12px 16px;
+  background:linear-gradient(135deg,var(--accent-soft),transparent); border:1px solid var(--line);
+  border-left:3px solid var(--kicker); border-radius:12px}
+.hsc-big{font-size:22px; font-weight:800; letter-spacing:-.01em; color:var(--ink)}
+.hsc-label{font-size:13.5px; color:var(--ink-soft); font-weight:600}
+
+/* Port Stephens brief */
+.ps-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:14px}
+.bf-row{padding:8px 0; border-top:1px solid var(--line)}
+.bf-row:first-of-type{border-top:none}
+.bf-k{display:block; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint)}
+.bf-v{font-size:14px; color:var(--ink)}
+.bf-verdict{font-weight:800; padding:1px 8px; border-radius:999px; font-size:12.5px}
+.bf-verdict.bf-good{color:var(--up); background:color-mix(in srgb,var(--up) 16%,transparent)}
+.bf-verdict.bf-fair{color:var(--kicker); background:color-mix(in srgb,var(--kicker) 16%,transparent)}
+.bf-verdict.bf-poor{color:var(--down); background:color-mix(in srgb,var(--down) 16%,transparent)}
+.bf-sub{display:block; font-size:12px; color:var(--ink-faint); margin-top:2px}
+
+/* Gold in AUD chip */
+.gold-aud{font-size:12.5px; font-weight:600; color:var(--ink-soft)}
+.gold-aud strong{color:var(--kicker); font-variant-numeric:tabular-nums}
+
+/* Micro pick */
+.pick-card{background:linear-gradient(135deg,var(--accent-soft),var(--panel)); border:1px solid var(--line);
+  border-radius:16px; padding:16px 18px; box-shadow:var(--shadow)}
+.pick-head{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap}
+.pick-name{font-size:18px; font-weight:780}
+.pick-sym{font-size:12px; font-weight:700; color:var(--ink-faint); letter-spacing:.04em}
+.pick-price{margin-left:auto; font-variant-numeric:tabular-nums; font-weight:720; font-size:15px; color:var(--ink)}
+.pick-price .mp-chg{font-size:12.5px}
+.pick-price.up .mp-chg{color:var(--up)} .pick-price.down .mp-chg{color:var(--down)} .pick-price.flat .mp-chg{color:var(--flat)}
+.pick-why{margin:10px 0 6px; font-size:14.5px; color:var(--ink); line-height:1.5}
+.pick-risk{margin:0; font-size:11.5px; color:var(--ink-faint); font-style:italic}
+.ps-grid-legacy{grid-template-columns:1.3fr 1fr}
+.ps-card{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px; box-shadow:var(--shadow)}
+.wx-now{display:flex; align-items:center; gap:12px}
+.wx-emoji{font-size:34px; line-height:1}
+.wx-temp{font-size:30px; font-weight:780; letter-spacing:-.02em}
+.wx-text{font-size:15px; color:var(--ink-soft); font-weight:600}
+.wx-meta{margin-top:10px; font-size:12.5px; color:var(--ink-faint); font-weight:600}
+.fire{border-left:4px solid var(--flat)}
+.fire-head{display:flex; align-items:baseline; justify-content:space-between; gap:8px}
+.fire-label{font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-faint)}
+.fire-rating{font-size:18px; font-weight:800}
+.fire-district{margin:8px 0 2px; font-size:13px; color:var(--ink-soft)}
+.fire-advice{margin:0; font-size:13.5px; font-weight:600; color:var(--ink)}
+.fire.fd-mod{border-left-color:#2e8b57} .fire.fd-mod .fire-rating{color:#2e8b57}
+.fire.fd-high{border-left-color:#e0a32c} .fire.fd-high .fire-rating{color:#e0a32c}
+.fire.fd-ext{border-left-color:#e0712c} .fire.fd-ext .fire-rating{color:#e0712c}
+.fire.fd-cat{border-left-color:var(--down)} .fire.fd-cat .fire-rating{color:var(--down)}
+.ps-note{margin:14px 0 0; font-size:14px; color:var(--ink-soft); padding-left:12px; border-left:3px solid var(--accent)}
+
+/* Mining & Resources watch */
+.mw-list{display:grid; grid-template-columns:1fr 1fr; gap:10px 18px}
+.mw-row{display:flex; align-items:center; justify-content:space-between; gap:12px; background:var(--panel);
+  border:1px solid var(--line); border-radius:12px; padding:11px 14px; box-shadow:var(--shadow)}
+.mw-main{display:flex; flex-direction:column; gap:2px; min-width:0}
+.mw-name{font-weight:680; font-size:14.5px}
+.mw-reason{font-size:11.5px; color:var(--ink-faint); line-height:1.35}
+.mw-nums{display:flex; flex-direction:column; align-items:flex-end; flex:none}
+.mw-price{font-variant-numeric:tabular-nums; font-weight:720; font-size:14.5px; color:var(--ink)}
+.mw-chg{font-variant-numeric:tabular-nums; font-size:12.5px; font-weight:650}
+.mw-row.up .mw-chg{color:var(--up)} .mw-row.down .mw-chg{color:var(--down)} .mw-row.flat .mw-chg{color:var(--flat)}
+
+/* Highlights */
+.hl-tag{font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kicker);
+  border:1px solid var(--line); border-radius:6px; padding:1px 7px}
+.hl-list{display:flex; flex-direction:column; gap:2px}
+.hl{display:flex; gap:12px; padding:13px 0; border-top:1px solid var(--line)}
+.hl:first-child{border-top:none}
+.hl-dot{flex:none; width:7px; height:7px; border-radius:50%; background:var(--accent); margin-top:7px}
+.hl-body h4{margin:0 0 3px; font-size:15.5px; font-weight:660; line-height:1.34}
+.hl-body h4 a{color:var(--ink)} .hl-body h4 a:hover{color:var(--accent)}
+
+/* Card hover lift + fade-in */
+.market-card,.eco-card,.watch-list li,.ps-card,.mw-row{transition:transform .18s ease, box-shadow .18s ease}
+.market-card:hover,.eco-card:hover,.mw-row:hover{transform:translateY(-2px)}
+main>.section{animation:rise .5s ease both}
+@keyframes rise{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+@media (max-width:560px){
+  .ps-grid{grid-template-columns:1fr}
+  .mw-list{grid-template-columns:1fr}
+  .wrap{padding:20px 15px 48px}
+  .greeting{font-size:27px}
+  .market-grid,.news-grid{grid-template-columns:1fr}
+  .wl-row{grid-template-columns:1fr auto auto; row-gap:2px}
+  .wl-pct{display:none}
+  .nav-brand{display:none}
+}
+@media print{
+  .topnav,.theme-btn{display:none}
+  body{background:#fff; color:#000}
+}
+</style>
+</head>
+<body>
+<a id="top"></a>
+<nav class="topnav">
+  <a class="nav-brand" href="#top">Chad</a>
+  <div class="nav-links"><a href="#section-local">Local</a><a href="#section-markets">Markets</a><a href="#section-mining">Mining</a><a href="#section-pick">Pick</a><a href="#section-themes">Overnight</a><a href="#section-watch">Watch</a><a href="#section-economy">Economy</a><a href="#section-highlights">Highlights</a><a href="#section-news">News</a><a href="#section-watchlist">Watchlist</a></div>
+  <a class="nav-game" href="minesweeper.html" title="Warm the brain up">&#9819; Minesweeper</a>
+  <button id="theme-btn" class="theme-btn" type="button" aria-label="Toggle light or dark theme">
+    <span class="t-icon"></span><span class="t-label"></span>
+  </button>
+</nav>
+<div class="wrap">
+  <header class="masthead">
+    <div class="mast-top">
+      <span class="kicker">Chad&#x27;s Morning Dispatch</span>
+      <div class="status" id="market-status"><span class="pill closed"><span class="dot"></span>US futures closed</span><span class="pill closed"><span class="dot"></span>ASX closed</span></div>
+    </div>
+    <h1 class="greeting">Good <span id="greet-part">morning</span>, Chad.</h1>
+    <p class="dateline">Saturday, 22 August 2026 <span class="read">· 7 min read</span></p>
+    <p class="tagline">Markets · Mining · Geopolitics · The world overnight</p>
+    <div class="hsc" data-hsc="2026-10-13T09:50:00+11:00"><span class="hsc-big" id="hsc-days">52 days</span><span class="hsc-label">to your first HSC exam · English</span></div>
+    <p class="mast-mood">US futures point higher; a constructive, risk-on overnight tone.</p>
+  </header>
+  <main><section class="section" id="section-local"><div class="section-head"><h2>Nelson Bay · Port Stephens</h2></div><div class="ps-grid"><div class="ps-card wx" id="wx" data-lat="-32.72" data-lon="152.15"><div class="wx-now"><span class="wx-emoji" id="wx-emoji">☁️</span><span class="wx-temp" id="wx-temp">12°</span><span class="wx-text" id="wx-text">Overcast</span></div><div class="wx-meta" id="wx-meta">High 22° · Low 12° · Wind 11 km/h · Hum 97% · Rain 65%</div></div><div class="ps-card fire fd-mod"><div class="fire-head"><span class="fire-label">Fire danger</span><span class="fire-rating">Moderate</span></div><p class="fire-district">Greater Hunter district</p><p class="fire-advice">Plan and prepare.</p></div><div class="ps-card bf"><div class="eco-head"><h3>Beach &amp; fuel</h3><span class="card-note">Birubi · Stockton Bight</span></div><div class="bf-row"><span class="bf-k">Beach driving</span><span class="bf-v"><span class="bf-verdict bf-good">Good</span> <span class="bf-sub">swell 0.6m @ 8s — low swell, manageable wind — fine for the sand</span></span></div><div class="bf-row"><span class="bf-k">U91 · cheapest NSW</span><span class="bf-v"><strong>186.9¢</strong><span class="bf-sub"> — Metford</span></span></div></div></div><p class="ps-note">Good conditions for outdoor work today.</p></section><section class="section" id="section-markets"><div class="section-head"><h2>Market Snapshot</h2><span class="breadth" id="breadth"><span class="up">27↑</span> <span class="down">8↓</span></span><span class="live-ind" id="live-ind" hidden><span class="live-pulse"></span><span class="live-text">live</span></span></div><div class="movers-wrap" id="movers"><div class="movers"><span class="movers-label">Big movers</span><span class="mover up"><span class="mover-name">Bitcoin</span><span class="mover-pct">▲ +6.17%</span></span><span class="mover down"><span class="mover-name">VIX Volatility</span><span class="mover-pct">▼ -4.68%</span></span><span class="mover up"><span class="mover-name">Ethereum</span><span class="mover-pct">▲ +4.10%</span></span><span class="mover up"><span class="mover-name">Platinum</span><span class="mover-pct">▲ +2.71%</span></span><span class="mover up"><span class="mover-name">Gold</span><span class="mover-pct">▲ +2.43%</span></span><span class="mover up"><span class="mover-name">Silver</span><span class="mover-pct">▲ +2.26%</span></span></div></div><div class="market-grid"><div class="market-card"><div class="card-head"><h3>US Markets</h3><span class="card-note">Futures / latest</span></div><div class="rows"><div class="row up" data-sym=".SPX" data-pct="0.5257"><div class="row-top"><span class="q-label">S&amp;P 500</span><span class="q-price">7,681.33</span></div><div class="row-bot"><span class="range up" title="Day range: 7,660.06 – 7,697.11"><span class="range-track"><span class="range-dot" style="left:57.4%"></span></span></span><span class="q-chg">▲ +40.17 <span class="q-pct">+0.53%</span></span></div></div><div class="row up" data-sym=".NDX" data-pct="0.3839"><div class="row-top"><span class="q-label">Nasdaq 100</span><span class="q-price">29,325.32</span></div><div class="row-bot"><span class="range up" title="Day range: 29,142.44 – 29,405.12"><span class="range-track"><span class="range-dot" style="left:69.6%"></span></span></span><span class="q-chg">▲ +112.15 <span class="q-pct">+0.38%</span></span></div></div><div class="row up" data-sym=".DJI" data-pct="1.0541"><div class="row-top"><span class="q-label">Dow</span><span class="q-price">53,315.33</span></div><div class="row-bot"><span class="range up" title="Day range: 52,768.87 – 53,321.74"><span class="range-track"><span class="range-dot" style="left:98.8%"></span></span></span><span class="q-chg">▲ +556.12 <span class="q-pct">+1.05%</span></span></div></div><div class="row up" data-sym=".RUT" data-pct="0.7751"><div class="row-top"><span class="q-label">Russell 2000</span><span class="q-price">3,015.63</span></div><div class="row-bot"><span class="range up" title="Day range: 3,000.05 – 3,016.82"><span class="range-track"><span class="range-dot" style="left:92.9%"></span></span></span><span class="q-chg">▲ +23.20 <span class="q-pct">+0.78%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>Metals &amp; Mining</h3><span class="card-note">Precious &amp; base metals</span></div><div class="rows"><div class="row up" data-sym="@GC.1" data-pct="2.4325"><div class="row-top"><span class="q-label">Gold</span><span class="q-price">4,682.60</span></div><div class="row-bot"><span class="range up" title="Day range: 4,565.50 – 4,690.40"><span class="range-track"><span class="range-dot" style="left:93.8%"></span></span></span><span class="q-chg">▲ +111.20 <span class="q-pct">+2.43%</span></span></div></div><div class="row up" data-sym="@SI.1" data-pct="2.2612"><div class="row-top"><span class="q-label">Silver</span><span class="q-price">69.64</span></div><div class="row-bot"><span class="range up" title="Day range: 67.96 – 70.08"><span class="range-track"><span class="range-dot" style="left:79.5%"></span></span></span><span class="q-chg">▲ +1.54 <span class="q-pct">+2.26%</span></span></div></div><div class="row up" data-sym="@HG.1" data-pct="1.7854"><div class="row-top"><span class="q-label">Copper</span><span class="q-price">6.585</span></div><div class="row-bot"><span class="range up" title="Day range: 6.479 – 6.619"><span class="range-track"><span class="range-dot" style="left:75.6%"></span></span></span><span class="q-chg">▲ +0.115 <span class="q-pct">+1.79%</span></span></div></div><div class="row flat" data-sym="@TIO.1" data-pct="0.0000"><div class="row-top"><span class="q-label">Iron Ore 62%</span><span class="q-price">95.16</span></div><div class="row-bot"><span class="range range--none"></span><span class="q-chg">• +0.00 <span class="q-pct">+0.00%</span></span></div></div><div class="row up" data-sym="@PL.1" data-pct="2.7133"><div class="row-top"><span class="q-label">Platinum</span><span class="q-price">1,889.00</span></div><div class="row-bot"><span class="range up" title="Day range: 1,839.80 – 1,921.40"><span class="range-track"><span class="range-dot" style="left:60.3%"></span></span></span><span class="q-chg">▲ +49.90 <span class="q-pct">+2.71%</span></span></div></div><div class="row up" data-sym="@PA.1" data-pct="0.7546"><div class="row-top"><span class="q-label">Palladium</span><span class="q-price">1,348.50</span></div><div class="row-bot"><span class="range up" title="Day range: 1,335.00 – 1,372.00"><span class="range-track"><span class="range-dot" style="left:36.5%"></span></span></span><span class="q-chg">▲ +10.10 <span class="q-pct">+0.75%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>Energy</h3><span class="card-note">Oil &amp; gas</span></div><div class="rows"><div class="row up" data-sym="@CL.1" data-pct="0.1612"><div class="row-top"><span class="q-label">WTI Crude</span><span class="q-price">86.97</span></div><div class="row-bot"><span class="range up" title="Day range: 85.80 – 87.51"><span class="range-track"><span class="range-dot" style="left:68.4%"></span></span></span><span class="q-chg">▲ +0.14 <span class="q-pct">+0.16%</span></span></div></div><div class="row up" data-sym="@LCO.1" data-pct="0.4798"><div class="row-top"><span class="q-label">Brent Crude</span><span class="q-price">94.23</span></div><div class="row-bot"><span class="range up" title="Day range: 92.74 – 94.83"><span class="range-track"><span class="range-dot" style="left:71.3%"></span></span></span><span class="q-chg">▲ +0.45 <span class="q-pct">+0.48%</span></span></div></div><div class="row up" data-sym="@NG.1" data-pct="1.1343"><div class="row-top"><span class="q-label">Nat Gas</span><span class="q-price">2.764</span></div><div class="row-bot"><span class="range up" title="Day range: 2.741 – 2.798"><span class="range-track"><span class="range-dot" style="left:40.4%"></span></span></span><span class="q-chg">▲ +0.031 <span class="q-pct">+1.13%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>World Markets</h3><span class="card-note">Major global indices</span></div><div class="rows"><div class="row up" data-sym=".FTSE" data-pct="0.6364"><div class="row-top"><span class="q-label">FTSE 100</span><span class="q-price">10,816.56</span></div><div class="row-bot"><span class="range up" title="Day range: 10,734.92 – 10,831.64"><span class="range-track"><span class="range-dot" style="left:84.4%"></span></span></span><span class="q-chg">▲ +68.40 <span class="q-pct">+0.64%</span></span></div></div><div class="row up" data-sym=".GDAXI" data-pct="0.5908"><div class="row-top"><span class="q-label">DAX (Germany)</span><span class="q-price">26,136.56</span></div><div class="row-bot"><span class="range up" title="Day range: 25,969.52 – 26,166.25"><span class="range-track"><span class="range-dot" style="left:84.9%"></span></span></span><span class="q-chg">▲ +153.52 <span class="q-pct">+0.59%</span></span></div></div><div class="row down" data-sym=".N225" data-pct="-0.3027"><div class="row-top"><span class="q-label">Nikkei 225</span><span class="q-price">66,016.36</span></div><div class="row-bot"><span class="range down" title="Day range: 65,260.22 – 66,125.88"><span class="range-track"><span class="range-dot" style="left:87.3%"></span></span></span><span class="q-chg">▼ -200.43 <span class="q-pct">-0.30%</span></span></div></div><div class="row up" data-sym=".HSI" data-pct="1.2101"><div class="row-top"><span class="q-label">Hang Seng</span><span class="q-price">26,009.46</span></div><div class="row-bot"><span class="range up" title="Day range: 25,807.61 – 26,009.46"><span class="range-track"><span class="range-dot" style="left:100.0%"></span></span></span><span class="q-chg">▲ +310.97 <span class="q-pct">+1.21%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>Australia</h3><span class="card-note">Local context (prior close)</span></div><div class="rows"><div class="row down" data-sym=".AXJO" data-pct="-0.2741"><div class="row-top"><span class="q-label">ASX 200</span><span class="q-price">9,058.90</span></div><div class="row-bot"><span class="range down" title="Day range: 9,045.00 – 9,083.80"><span class="range-track"><span class="range-dot" style="left:35.8%"></span></span></span><span class="q-chg">▼ -24.90 <span class="q-pct">-0.27%</span></span></div></div><div class="row down" data-sym=".AORD" data-pct="-0.3097"><div class="row-top"><span class="q-label">All Ordinaries</span><span class="q-price">9,269.70</span></div><div class="row-bot"><span class="range down" title="Day range: 9,256.40 – 9,298.50"><span class="range-track"><span class="range-dot" style="left:31.6%"></span></span></span><span class="q-chg">▼ -28.80 <span class="q-pct">-0.31%</span></span></div></div><div class="row up" data-sym="AUD=" data-pct="0.9141"><div class="row-top"><span class="q-label">AUD / USD</span><span class="q-price">0.7176</span></div><div class="row-bot"><span class="range up" title="Day range: 0.7109 – 0.7180"><span class="range-track"><span class="range-dot" style="left:94.4%"></span></span></span><span class="q-chg">▲ +0.0065 <span class="q-pct">+0.91%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>Currencies</h3><span class="card-note">Major FX pairs</span></div><div class="rows"><div class="row up" data-sym="EUR=" data-pct="0.0343"><div class="row-top"><span class="q-label">EUR / USD</span><span class="q-price">1.1682</span></div><div class="row-bot"><span class="range up" title="Day range: 1.1669 – 1.1711"><span class="range-track"><span class="range-dot" style="left:31.0%"></span></span></span><span class="q-chg">▲ +0.0004 <span class="q-pct">+0.03%</span></span></div></div><div class="row down" data-sym="JPY=" data-pct="-0.0314"><div class="row-top"><span class="q-label">USD / JPY</span><span class="q-price">159.00</span></div><div class="row-bot"><span class="range down" title="Day range: 158.36 – 159.13"><span class="range-track"><span class="range-dot" style="left:83.1%"></span></span></span><span class="q-chg">▼ -0.05 <span class="q-pct">-0.03%</span></span></div></div><div class="row up" data-sym="GBP=" data-pct="0.1541"><div class="row-top"><span class="q-label">GBP / USD</span><span class="q-price">1.3650</span></div><div class="row-bot"><span class="range up" title="Day range: 1.3619 – 1.3675"><span class="range-track"><span class="range-dot" style="left:55.4%"></span></span></span><span class="q-chg">▲ +0.0021 <span class="q-pct">+0.15%</span></span></div></div><div class="row up" data-sym="NZD=" data-pct="0.6562"><div class="row-top"><span class="q-label">NZD / USD</span><span class="q-price">0.5982</span></div><div class="row-bot"><span class="range up" title="Day range: 0.5940 – 0.5987"><span class="range-track"><span class="range-dot" style="left:89.4%"></span></span></span><span class="q-chg">▲ +0.0039 <span class="q-pct">+0.66%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>Sovereign Bonds</h3><span class="card-note">10Y yields &amp; the curve</span></div><div class="rows"><div class="row up" data-sym="US2Y" data-danger="4.8000" data-pct="1.1231"><div class="row-top"><span class="q-label">US 2Y<span class="warn" title="Yield at/above danger level (4.80%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">4.232</span></div><div class="row-bot"><span class="range up" title="Day range: 4.174 – 4.244"><span class="range-track"><span class="range-dot" style="left:82.9%"></span></span></span><span class="q-chg">▲ +0.047 <span class="q-pct">+1.12%</span></span></div></div><div class="row up" data-sym="US10Y" data-danger="4.8000" data-pct="0.8089"><div class="row-top"><span class="q-label">US 10Y<span class="warn" title="Yield at/above danger level (4.80%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">4.736</span></div><div class="row-bot"><span class="range up" title="Day range: 4.682 – 4.744"><span class="range-track"><span class="range-dot" style="left:87.1%"></span></span></span><span class="q-chg">▲ +0.038 <span class="q-pct">+0.81%</span></span></div></div><div class="row up danger" data-sym="US30Y" data-danger="5.0000" data-pct="0.7447"><div class="row-top"><span class="q-label">US 30Y<span class="warn" title="Yield at/above danger level (5.00%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">5.276</span></div><div class="row-bot"><span class="range up" title="Day range: 5.232 – 5.283"><span class="range-track"><span class="range-dot" style="left:86.3%"></span></span></span><span class="q-chg">▲ +0.039 <span class="q-pct">+0.74%</span></span></div></div><div class="row down" data-sym="AU2Y" data-danger="4.8000" data-pct="-0.9561"><div class="row-top"><span class="q-label">Australia 2Y<span class="warn" title="Yield at/above danger level (4.80%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">4.558</span></div><div class="row-bot"><span class="range down" title="Day range: 4.558 – 4.604"><span class="range-track"><span class="range-dot" style="left:0.0%"></span></span></span><span class="q-chg">▼ -0.044 <span class="q-pct">-0.96%</span></span></div></div><div class="row down danger" data-sym="AU10Y" data-danger="5.0000" data-pct="-0.0199"><div class="row-top"><span class="q-label">Australia 10Y<span class="warn" title="Yield at/above danger level (5.00%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">5.034</span></div><div class="row-bot"><span class="range down" title="Day range: 5.008 – 5.038"><span class="range-track"><span class="range-dot" style="left:86.7%"></span></span></span><span class="q-chg">▼ -0.001 <span class="q-pct">-0.02%</span></span></div></div><div class="row up" data-sym="DE10Y-DE" data-danger="3.5000" data-pct="0.2180"><div class="row-top"><span class="q-label">Germany 10Y<span class="warn" title="Yield at/above danger level (3.50%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">3.264</span></div><div class="row-bot"><span class="range up" title="Day range: 3.240 – 3.268"><span class="range-track"><span class="range-dot" style="left:84.8%"></span></span></span><span class="q-chg">▲ +0.007 <span class="q-pct">+0.22%</span></span></div></div><div class="row up danger" data-sym="GB10Y-GB" data-danger="5.0000" data-pct="0.0948"><div class="row-top"><span class="q-label">UK 10Y<span class="warn" title="Yield at/above danger level (5.00%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">5.069</span></div><div class="row-bot"><span class="range up" title="Day range: 5.033 – 5.074"><span class="range-track"><span class="range-dot" style="left:87.4%"></span></span></span><span class="q-chg">▲ +0.005 <span class="q-pct">+0.09%</span></span></div></div><div class="row up danger" data-sym="JP10Y-JP" data-danger="2.5000" data-pct="0.4175"><div class="row-top"><span class="q-label">Japan 10Y<span class="warn" title="Yield at/above danger level (2.50%) — fiscal-stress signal">&#9888;</span></span><span class="q-price">2.886</span></div><div class="row-bot"><span class="range up" title="Day range: 2.874 – 2.894"><span class="range-track"><span class="range-dot" style="left:60.0%"></span></span></span><span class="q-chg">▲ +0.012 <span class="q-pct">+0.42%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>Rates &amp; Risk</h3><span class="card-note">USD &amp; volatility</span></div><div class="rows"><div class="row down" data-sym=".DXY" data-pct="-0.0951"><div class="row-top"><span class="q-label">US Dollar Index</span><span class="q-price">98.80</span></div><div class="row-bot"><span class="range down" title="Day range: 98.56 – 98.91"><span class="range-track"><span class="range-dot" style="left:68.5%"></span></span></span><span class="q-chg">▼ -0.09 <span class="q-pct">-0.10%</span></span></div></div><div class="row down" data-sym=".VIX" data-pct="-4.6846"><div class="row-top"><span class="q-label">VIX Volatility</span><span class="q-price">15.260</span></div><div class="row-bot"><span class="range down" title="Day range: 15.210 – 15.880"><span class="range-track"><span class="range-dot" style="left:7.5%"></span></span></span><span class="q-chg">▼ -0.750 <span class="q-pct">-4.68%</span></span></div></div></div></div><div class="market-card"><div class="card-head"><h3>Crypto</h3><span class="card-note">Digital assets</span></div><div class="rows"><div class="row up" data-sym="BTC=" data-pct="6.1727"><div class="row-top"><span class="q-label">Bitcoin</span><span class="q-price">77,141.20</span></div><div class="row-bot"><span class="range up" title="Day range: 72,496.54 – 79,455.40"><span class="range-track"><span class="range-dot" style="left:66.7%"></span></span></span><span class="q-chg">▲ +4,484.86 <span class="q-pct">+6.17%</span></span></div></div><div class="row up" data-sym="ETH=" data-pct="4.0986"><div class="row-top"><span class="q-label">Ethereum</span><span class="q-price">2,416.70</span></div><div class="row-bot"><span class="range up" title="Day range: 2,308.30 – 2,445.30"><span class="range-track"><span class="range-dot" style="left:79.1%"></span></span></span><span class="q-chg">▲ +95.15 <span class="q-pct">+4.10%</span></span></div></div></div></div></div></section><section class="section" id="section-mining"><div class="section-head"><h2>Chad&#x27;s Mining &amp; Resources Watch</h2><span class="gold-aud" id="gold-aud" title="Gold in Australian dollars per ounce — the benchmark most ASX gold juniors track">Gold <strong>A$6,525</strong>/oz</span></div><div class="mw-list"><div class="mw-row up" data-sym="TSO.AX"><div class="mw-main"><span class="mw-name">Tesoro Gold<span class="sens" title="Ternera Infill Returns Wide, High-Grade Gold Intercepts">&#42;</span></span><span class="mw-reason">Kun gold project, Chile — drilling + gold leverage</span></div><div class="mw-nums"><span class="mw-price">1.0600</span><span class="mw-chg">▲ +2.91%</span></div></div><div class="mw-row down" data-sym="SHN.AX"><div class="mw-main"><span class="mw-name">Sunshine Metals</span><span class="mw-reason">Qld copper-gold-zinc; resource growth story</span></div><div class="mw-nums"><span class="mw-price">0.0390</span><span class="mw-chg">▼ -2.50%</span></div></div><div class="mw-row up" data-sym="BHL.AX"><div class="mw-main"><span class="mw-name">Black Horse Min.</span><span class="mw-reason">Iron ore / exploration — early-stage spec</span></div><div class="mw-nums"><span class="mw-price">0.2150</span><span class="mw-chg">▲ +4.88%</span></div></div><div class="mw-row up" data-sym="TMS.AX"><div class="mw-main"><span class="mw-name">Tennant Minerals</span><span class="mw-reason">NT copper-gold (Bluebird) — high-grade hits</span></div><div class="mw-nums"><span class="mw-price">0.0090</span><span class="mw-chg">▲ +12.50%</span></div></div><div class="mw-row flat" data-sym="ORI.AX"><div class="mw-main"><span class="mw-name">Orica</span><span class="mw-reason">Explosives bellwether — reads mining activity</span></div><div class="mw-nums"><span class="mw-price">22.16</span><span class="mw-chg">• +0.00%</span></div></div><div class="mw-row down" data-sym="BHP.AX"><div class="mw-main"><span class="mw-name">BHP Group</span><span class="mw-reason">Iron ore + copper anchor for the sector</span></div><div class="mw-nums"><span class="mw-price">65.16</span><span class="mw-chg">▼ -0.90%</span></div></div><div class="mw-row up" data-sym="RIO.AX"><div class="mw-main"><span class="mw-name">Rio Tinto</span><span class="mw-reason">Iron ore majors / Pilbara + Simandou</span></div><div class="mw-nums"><span class="mw-price">175.38</span><span class="mw-chg">▲ +1.35%</span></div></div></div></section><section class="section" id="section-pick"><div class="section-head"><h2>Micro Pick of the Day</h2><span class="hl-tag">high risk</span></div><div class="pick-card" data-sym="BHL.AX"><div class="pick-head"><span class="pick-name">Black Horse Mining</span><span class="pick-sym">BHL.ASX</span><span class="mp-price up">0.2150 <span class="mp-chg">▲ +4.88%</span></span></div><p class="pick-why">Pure early-stage spec — iron ore / exploration. Lottery-ticket risk; only ever a small, position-sized punt.</p><p class="pick-risk">Speculative micro-cap — a talking point, not advice. Size accordingly.</p></div></section><section class="section" id="section-themes"><div class="section-head"><h2>Overnight Themes</h2><span class="badge-fallback" title="AI synthesis layer is off (no API key) — using the rule-based writer">basic mode</span></div><p class="mood">US futures point higher; a constructive, risk-on overnight tone.</p><div class="themes"><div class="theme"><div class="theme-num">1</div><div class="theme-body"><span class="theme-kicker">Markets</span><h4>The overnight market picture</h4><p>Risk appetite looks firm — 27 of 36 tracked instruments higher. The biggest overnight moves: Bitcoin +6.17%; VIX Volatility -4.68%; Ethereum +4.10%. That sets the backdrop for the local session.</p></div></div><div class="theme"><div class="theme-num">2</div><div class="theme-body"><span class="theme-kicker">Business &amp; Markets</span><h4>Trump, Vance and Bessent try to calm the bond market with ‘alternative facts’</h4><p>Maybe this stuff works on TV or on the stump. But it doesn’t work on Wall Street, where people can count. Also developing: The Treasury, the Fed and the threat to your money</p></div></div><div class="theme"><div class="theme-num">3</div><div class="theme-body"><span class="theme-kicker">Australia</span><h4>Batteries send power prices up in midnight charging mystery</h4><p>Australia is leading the world in the adoption of batteries big and small. But in one state, storage is fuelling some perverse and pricey outcomes. Also developing: Fiddler on the Roof features an usher turned actor in starring role</p></div></div><div class="theme"><div class="theme-num">4</div><div class="theme-body"><span class="theme-kicker">Geopolitics &amp; Global</span><h4>Russian double-tap drone strike kills 15 in Ukrainian mall, officials say</h4><p>Another 130 people, including 23 children, were injured when the shopping centre was hit, according to the regional head. Also developing: Espanyol vs Real Madrid: La Liga – prediction, lineups, teams</p></div></div><div class="theme"><div class="theme-num">5</div><div class="theme-body"><span class="theme-kicker">Mining, Resources &amp; Energy</span><h4>Iraq Wants to Double Oil Output—and Needs OPEC to Get Out of the Way</h4><p>Iraq wants to more than double its oil production within six years. First, it needs OPEC to let it. Baghdad is targeting output of between 8 million and 10 million barrels per day, up from roughly 4 million bpd before the Iran war, Prime… Also developing: China Challenges Russia’s Arms Dominance in Central Asia</p></div></div></div></section><section class="section" id="section-watch"><div class="section-head"><h2>What to Watch Today</h2></div><ul class="watch-list"><li><span class="watch-dot"></span><span class="watch-text"><strong>Bitcoin (+6.17%)</strong><span class="watch-detail">Extending higher overnight — watch for follow-through into the local session.</span></span></li><li><span class="watch-dot"></span><span class="watch-text"><strong>VIX Volatility (-4.68%)</strong><span class="watch-detail">Under pressure overnight — watch for follow-through into the local session.</span></span></li><li><span class="watch-dot"></span><span class="watch-text"><strong>Ethereum (+4.10%)</strong><span class="watch-detail">Extending higher overnight — watch for follow-through into the local session.</span></span></li><li><span class="watch-dot"></span><span class="watch-text"><strong>Platinum (+2.71%)</strong><span class="watch-detail">Extending higher overnight — watch for follow-through into the local session.</span></span></li><li><span class="watch-dot"></span><span class="watch-text"><strong>Russian double-tap drone strike kills 15 in Ukrainian mall, officials sa</strong><span class="watch-detail">Developing story (BBC World) — worth tracking today.</span></span></li><li><span class="watch-dot"></span><span class="watch-text"><strong>Trump, Vance and Bessent try to calm the bond market with ‘alternative f</strong><span class="watch-detail">Developing story (MarketWatch Top) — worth tracking today.</span></span></li></ul></section><section class="section" id="section-economy"><div class="section-head"><h2>Economy &amp; Rates</h2></div><div class="eco-grid"><div class="eco-card recession watch"><div class="eco-head"><h3>Recession risk</h3><span class="rec-label">Some risk</span></div><div class="gauge"><div class="gauge-track"></div><div class="gauge-marker" style="left:50%"></div></div><div class="gauge-scale"><span>Low</span><span>Elevated</span></div><p class="eco-detail">US 2s10s curve positive at +50 bps. A positively sloped curve is historically consistent with expansion.</p><p class="eco-fine">US 2Y 4.23% · US 10Y 4.74% · yield-curve signal</p></div><div class="eco-card"><div class="eco-head"><h3>Central bank rates</h3></div><div class="rate-list"><div class="rate-row"><span class="rate-name">RBA Cash Rate</span><span class="rate-val">3.85%</span><span class="rate-note">Reserve Bank of Australia</span></div><div class="rate-row"><span class="rate-name">US Fed Funds</span><span class="rate-val">4.25–4.50%</span><span class="rate-note">Upper bound 4.50%</span></div><div class="rate-row"><span class="rate-name">ECB Deposit Rate</span><span class="rate-val">2.00%</span><span class="rate-note">European Central Bank</span></div><div class="rate-row"><span class="rate-name">BoE Bank Rate</span><span class="rate-val">4.00%</span><span class="rate-note">Bank of England</span></div></div></div><div class="eco-card"><div class="eco-head"><h3>AU housing</h3><span class="card-note">indicative · update in config</span></div><div class="rate-list"><div class="rate-row"><span class="rate-name">National median dwelling</span><span class="rate-val">$820,000</span><span class="rate-note">+0.4% m/m</span></div><div class="rate-row"><span class="rate-name">Sydney median dwelling</span><span class="rate-val">$1,190,000</span><span class="rate-note">+0.3% m/m</span></div><div class="rate-row"><span class="rate-name">NSW regional median</span><span class="rate-val">$745,000</span><span class="rate-note">+0.5% m/m</span></div></div></div></div></section><section class="section" id="section-highlights"><div class="section-head"><h2>Chad&#x27;s Highlights</h2><span class="hl-tag">picked for you</span></div><div class="hl-list"><article class="hl"><span class="hl-dot"></span><div class="hl-body"><h4><a href="https://oilprice.com/Energy/Crude-Oil/US-Oil-Drillers-See-Pullback-as-Oil-Prices-Rise.html" target="_blank" rel="noopener">US Oil Drillers See Pullback as Oil Prices Rise<span class="ext">↗</span></a></h4><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">1h ago</span></div></div></article><article class="hl"><span class="hl-dot"></span><div class="hl-body"><h4><a href="https://oilprice.com/Latest-Energy-News/World-News/Iraq-Wants-to-Double-Oil-Outputand-Needs-OPEC-to-Get-Out-of-the-Way.html" target="_blank" rel="noopener">Iraq Wants to Double Oil Output—and Needs OPEC to Get Out of the Way<span class="ext">↗</span></a></h4><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">30m ago</span></div></div></article><article class="hl"><span class="hl-dot"></span><div class="hl-body"><h4><a href="https://www.mining.com/silver-price-20-august-surge-sends-miners-soaring/" target="_blank" rel="noopener">Silver price 20% August surge sends miners soaring<span class="ext">↗</span></a></h4><div class="story-meta"><span class="src">Mining.com</span><span class="age">1h ago</span></div></div></article><article class="hl"><span class="hl-dot"></span><div class="hl-body"><h4><a href="https://oilprice.com/Energy/Energy-General/China-Challenges-Russias-Arms-Dominance-in-Central-Asia.html" target="_blank" rel="noopener">China Challenges Russia’s Arms Dominance in Central Asia<span class="ext">↗</span></a></h4><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">1h ago</span></div></div></article></div></section><section class="section" id="section-news"><div class="section-head"><h2>News &amp; Announcements</h2></div><div class="news-grid"><div class="news-cat"><h3 class="news-cat-title">Business &amp; Markets<span class="news-count">8</span></h3><div class="stories"><article class="story story--lead"><h4 class="story-title"><a href="https://www.marketwatch.com/story/trump-vance-and-bessent-try-to-calm-the-bond-market-with-alternative-facts-8e424378?mod=mw_rss_topstories" target="_blank" rel="noopener">Trump, Vance and Bessent try to calm the bond market with ‘alternative facts’<span class="ext">↗</span></a></h4><p class="story-sum">Maybe this stuff works on TV or on the stump. But it doesn’t work on Wall Street, where people can count.</p><div class="story-meta"><span class="src">MarketWatch Top</span><span class="age">31m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/the-treasury-the-fed-and-the-threat-to-your-money-774442ad?mod=mw_rss_topstories" target="_blank" rel="noopener">The Treasury, the Fed and the threat to your money<span class="ext">↗</span></a></h4><p class="story-sum">Also in Weekend Reads: The Gen Z online sports-betting trend, what’s next for Apple as Tim Cook exits, and a bullish take on Nvidia heading into earnings.</p><div class="story-meta"><span class="src">MarketWatch Top</span><span class="age">45m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/my-son-does-not-work-yet-he-pays-500-for-aca-health-insurance-how-is-that-fair-92f578c4?mod=mw_rss_topstories" target="_blank" rel="noopener">My son does not work, yet pays $500 for Affordable Care Act health insurance. Is that fair?<span class="ext">↗</span></a></h4><p class="story-sum">“I see people who have a lot of money but little or no taxable income who still qualify for ACA Marketplace subsidies.”</p><div class="story-meta"><span class="src">MarketWatch Top</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.cnbc.com/2026/08/21/kalshi-traders-say-bitcoin-rally-wont-go-much-higher-by-end-of-2026.html" target="_blank" rel="noopener">Kalshi traders think the bitcoin rally could end the year near current levels<span class="ext">↗</span></a></h4><p class="story-sum">Speculators on the prediction market platform think it&#x27;s most likely that the cryptocurrency will end 2026 close to where it&#x27;s now trading.</p><div class="story-meta"><span class="src">CNBC Finance</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.cnbc.com/2026/08/21/stocks-making-the-biggest-moves-midday-mrna-hood-bj-coin.html" target="_blank" rel="noopener">Stocks making the biggest moves midday: Moderna, Robinhood, BJ&#x27;s Wholesale, Coinbase &amp; more<span class="ext">↗</span></a></h4><p class="story-sum">These are some of the stocks posting the largest moves midday.</p><div class="story-meta"><span class="src">CNBC Finance</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/5-things-to-know-about-the-chinese-e-commerce-juggernaut-shein-ahead-of-its-ipo-ee73d6b1?mod=mw_rss_topstories" target="_blank" rel="noopener">5 things to know about the Chinese e-commerce juggernaut Shein ahead of its IPO<span class="ext">↗</span></a></h4><p class="story-sum">The fast-fashion giant is targeting a listing in Hong Kong by Sept. 1. It’s been trying to go public for four years.</p><div class="story-meta"><span class="src">MarketWatch Top</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/tesla-stocks-jumps-as-the-company-gets-ready-for-a-robotaxi-push-c680f87f?mod=mw_rss_topstories" target="_blank" rel="noopener">Tesla’s stock jumps as the company gets ready for a robotaxi push<span class="ext">↗</span></a></h4><p class="story-sum">The automaker plans to soon launch its Cybercab in Austin, Texas, and got the nod to deploy thousands of vehicles in Nevada.</p><div class="story-meta"><span class="src">MarketWatch Top</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.marketwatch.com/story/the-u-s-and-canada-are-scrambling-to-avoid-new-tariffs-and-seal-a-trade-deal-heres-what-could-be-in-it-f01dd61c?mod=mw_rss_topstories" target="_blank" rel="noopener">The U.S. and Canada are scrambling to avoid new tariffs and seal a trade deal. Here’s what could be in it.<span class="ext">↗</span></a></h4><p class="story-sum">U.S. and Canadian officials were engaged in additional talks on Friday. Details about what’s in their new trade deal have trickled out.</p><div class="story-meta"><span class="src">MarketWatch Top</span><span class="age">2h ago</span></div></article></div></div><div class="news-cat"><h3 class="news-cat-title">Australia<span class="news-count">8</span></h3><div class="stories"><article class="story story--lead"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-08-22/batteries-pushed-power-prices-up-in-midnight-charging-surge/107047470" target="_blank" rel="noopener">Batteries send power prices up in midnight charging mystery<span class="ext">↗</span></a></h4><p class="story-sum">Australia is leading the world in the adoption of batteries big and small. But in one state, storage is fuelling some perverse and pricey outcomes.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">5m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-08-22/ellen-ebbs-actor-fiddler-on-the-roof-usher-theatre-royal-sydney/107065114" target="_blank" rel="noopener">Fiddler on the Roof features an usher turned actor in starring role<span class="ext">↗</span></a></h4><p class="story-sum">Ellen Ebbs has made her main stage debut in Fiddler on the Roof at Theatre Royal Sydney, where she previously cleaned the stalls and made cocktails as an usher.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">5m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-08-22/claudia-karvan-airport-chaplain-hugo-weaving/107054294" target="_blank" rel="noopener">Claudia Karvan on The Secret Life of Us finale that was never filmed<span class="ext">↗</span></a></h4><p class="story-sum">The legendary Australian actor talks religion, the chance of a Secret Life of Us reboot and what it was like growing up under a spotlight.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">5m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-08-22/the-week-that-blew-up-the-swans-and-called-out-afl-culture/107063866" target="_blank" rel="noopener">The week that blew up the Swans and called out AFL culture<span class="ext">↗</span></a></h4><p class="story-sum">The Swans scandal is creating a greater conversation around the AFL&#x27;s handling of allegations of violence against women and its lack of a &quot;no-fault stand-down&quot; policy.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">17m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-08-22/ai-disruption-compensation-court-payout/107062772" target="_blank" rel="noopener">AI&#x27;s threat to future jobs considered in landmark NSW compensation decision<span class="ext">↗</span></a></h4><p class="story-sum">In a landmark compensation decision a tribunal has taken into account how AI may create more job market uncertainty in considering a worker&#x27;s future lost earnings.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">17m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-08-22/nurses-teachers-overseas-visa-applicant-delay/107065692" target="_blank" rel="noopener">Employers forced to wait 12 months for overseas nurses, teachers<span class="ext">↗</span></a></h4><p class="story-sum">Business leaders hope the current visa settings will be in place for &#x27;a very short time&#x27;, given the visa decision wait time blow out.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">17m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/science/2026-08-22/flannel-flower-australias-most-amazing-wildflower/107053414" target="_blank" rel="noopener">Australia has a soft spot for the amazing flannel flower<span class="ext">↗</span></a></h4><p class="story-sum">The flannel flower is a beautiful bloom with a few superpowers up its floral sleeve. And it&#x27;s not just an east-coast star.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">30m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.abc.net.au/news/2026-08-22/john-cameron-mitchell-hedwig-and-angry-inch-bowie-punk-fascism/107054156" target="_blank" rel="noopener">From Hedwig to Bowie, John Cameron Mitchell on art fighting fascism<span class="ext">↗</span></a></h4><p class="story-sum">The Tony-winning playwright, filmmaker and performer returns to Australia to celebrate Bowie, punk and 25 years of queer classic Hedwig and the Angry Inch.</p><div class="story-meta"><span class="src">ABC Top Stories</span><span class="age">30m ago</span></div></article></div></div><div class="news-cat"><h3 class="news-cat-title">Geopolitics &amp; Global<span class="news-count">8</span></h3><div class="stories"><article class="story story--lead"><h4 class="story-title"><a href="https://www.bbc.co.uk/news/articles/c39egw7nmk2o?at_medium=RSS&amp;at_campaign=rss" target="_blank" rel="noopener">Russian double-tap drone strike kills 15 in Ukrainian mall, officials say<span class="ext">↗</span></a></h4><p class="story-sum">Another 130 people, including 23 children, were injured when the shopping centre was hit, according to the regional head.</p><div class="story-meta"><span class="src">BBC World</span><span class="age">9m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.aljazeera.com/sports/2026/8/21/espanyol-vs-real-madrid-la-liga-prediction-lineups-teams?traffic_source=rss" target="_blank" rel="noopener">Espanyol vs Real Madrid: La Liga – prediction, lineups, teams<span class="ext">↗</span></a></h4><p class="story-sum">Real Madrid kickoff their campaign at Espanyol in Barcelona as Jose Mourinho&#x27;s targets winning La Liga return.</p><div class="story-meta"><span class="src">Al Jazeera</span><span class="age">20m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.aljazeera.com/video/newsfeed/2026/8/21/drone-strike-on-ukraine-shopping-centre-kills-six-injures-103?traffic_source=rss" target="_blank" rel="noopener">Drone strike on Ukraine shopping centre kills six, injures 103<span class="ext">↗</span></a></h4><p class="story-sum">A Russian drone strike hit a major shopping centre in Kryvyi Rih, Ukraine, killing six people and injuring 103</p><div class="story-meta"><span class="src">Al Jazeera</span><span class="age">20m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.theguardian.com/us-news/live/2026/aug/21/democrats-progressive-election-politics-live" target="_blank" rel="noopener">Doris Miller’s family ‘shocked’ by Navy’s reported consideration of honoring Trump instead of black war hero – live<span class="ext">↗</span></a></h4><p class="story-sum">Thomas Bledsoe told CNN the potential move is ‘quite a shock’ and that the family were not notified beforehand US navy carrier set to honor Black war hero may reportedly be renamed after Trump Sign up for the US Breaking News email US…</p><div class="story-meta"><span class="src">Guardian World</span><span class="age">26m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.bbc.co.uk/news/articles/cwye9g9r58zo?at_medium=RSS&amp;at_campaign=rss" target="_blank" rel="noopener">Meghan in talks for role in Netflix series The Gentlemen, BBC understands<span class="ext">↗</span></a></h4><p class="story-sum">This would be Meghan&#x27;s first significant acting role since her marriage to Prince Harry.</p><div class="story-meta"><span class="src">BBC World</span><span class="age">31m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.bbc.co.uk/news/articles/ce8l7w0n0jeo?at_medium=RSS&amp;at_campaign=rss" target="_blank" rel="noopener">Two injured in stabbing attack at Canada Sikh temple<span class="ext">↗</span></a></h4><p class="story-sum">One suspect is in custody, but police have not disclosed a possible motive.</p><div class="story-meta"><span class="src">BBC World</span><span class="age">33m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.aljazeera.com/video/newsfeed/2026/8/21/former-pakistan-pm-imran-khan-taken-back-to-prison-after-hospital-check-up?traffic_source=rss" target="_blank" rel="noopener">Former Pakistan PM Imran Khan taken back to prison after hospital check-up<span class="ext">↗</span></a></h4><p class="story-sum">Relatives of former Pakistani Prime Minister Imran Khan say he’s being tortured in prison.</p><div class="story-meta"><span class="src">Al Jazeera</span><span class="age">35m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.theguardian.com/us-news/2026/aug/21/dhs-confirm-nevada-voter-numbers" target="_blank" rel="noopener">DHS confirms just 185 non-citizens on Nevada voter rolls after claiming there were thousands more<span class="ext">↗</span></a></h4><p class="story-sum">The department told Nevada officials that the 15,903 figure registered was ‘preliminary’ and more than 14,000 names still needed review About a month after alleging Nevada had as many as 16,000 non-citizens on its voter rolls, Department…</p><div class="story-meta"><span class="src">Guardian World</span><span class="age">38m ago</span></div></article></div></div><div class="news-cat"><h3 class="news-cat-title">Mining, Resources &amp; Energy<span class="news-count">8</span></h3><div class="stories"><article class="story story--lead"><h4 class="story-title"><a href="https://oilprice.com/Latest-Energy-News/World-News/Iraq-Wants-to-Double-Oil-Outputand-Needs-OPEC-to-Get-Out-of-the-Way.html" target="_blank" rel="noopener">Iraq Wants to Double Oil Output—and Needs OPEC to Get Out of the Way<span class="ext">↗</span></a></h4><p class="story-sum">Iraq wants to more than double its oil production within six years. First, it needs OPEC to let it. Baghdad is targeting output of between 8 million and 10 million barrels per day, up from roughly 4 million bpd before the Iran war, Prime…</p><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">30m ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Energy/Energy-General/China-Challenges-Russias-Arms-Dominance-in-Central-Asia.html" target="_blank" rel="noopener">China Challenges Russia’s Arms Dominance in Central Asia<span class="ext">↗</span></a></h4><p class="story-sum">China is challenging Russia’s stranglehold on Central Asia’s arms market. Uzbekistan appears to have taken delivery of four PRC-made ChengduJ-10CE multi-role combat aircraft, according to multiple reports, one of which includes a photo of…</p><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Latest-Energy-News/World-News/Tankers-Wait-a-Month-as-Venezuela-Hits-an-Oil-Export-Ceiling.html" target="_blank" rel="noopener">Tankers Wait a Month as Venezuela Hits an Oil Export Ceiling<span class="ext">↗</span></a></h4><p class="story-sum">Venezuela has plenty of oil buyers again. What it does not have is enough functioning port infrastructure to get them their crude. Tankers are waiting as long as 30 days to load Venezuelan oil as aging terminals, power outages and…</p><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Energy/Crude-Oil/US-Oil-Drillers-See-Pullback-as-Oil-Prices-Rise.html" target="_blank" rel="noopener">US Oil Drillers See Pullback as Oil Prices Rise<span class="ext">↗</span></a></h4><p class="story-sum">The total number of active drilling rigs for oil and gas in the United States fell this week, according to new data that Baker Hughes published on Friday, with the total rig count in the US falling to 588, up 50 from this same time last…</p><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.mining.com/silver-price-20-august-surge-sends-miners-soaring/" target="_blank" rel="noopener">Silver price 20% August surge sends miners soaring<span class="ext">↗</span></a></h4><p class="story-sum">Silver’s run to $70 has ignited mining stocks as major banks map out further upside for the precious metal this year.</p><div class="story-meta"><span class="src">Mining.com</span><span class="age">1h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Latest-Energy-News/World-News/India-Boosts-Battery-Investment-to-Cut-Solar-Power-Waste.html" target="_blank" rel="noopener">India Boosts Battery Investment to Cut Solar Power Waste<span class="ext">↗</span></a></h4><p class="story-sum">Solar power developers in India have started to add battery storage to photovoltaic projects to attract buyers and reduce the large share of curtailments for power supply that the grids are unable to absorb, Santosh Sarangi, Secretary of…</p><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">2h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://www.mining.com/minings-next-biggest-challenge-is-securing-talent/" target="_blank" rel="noopener">Mining’s next biggest challenge is securing talent<span class="ext">↗</span></a></h4><p class="story-sum">While mining developments grow, the opposite is happening with its workforce and education.</p><div class="story-meta"><span class="src">Mining.com</span><span class="age">2h ago</span></div></article><article class="story"><h4 class="story-title"><a href="https://oilprice.com/Geopolitics/Asia/Americas-Next-Strategic-Partner-Is-Hiding-in-Plain-Sight.html" target="_blank" rel="noopener">America’s Next Strategic Partner Is Hiding in Plain Sight<span class="ext">↗</span></a></h4><p class="story-sum">When Uzbekistan celebrates 35 years of independence on September 1st, Washington should do more than congratulate its people and government. It should recognize a strategic opportunity and make Uzbekistan the anchor of its policy in…</p><div class="story-meta"><span class="src">OilPrice.com</span><span class="age">2h ago</span></div></article></div></div></div></section><section class="section" id="section-watchlist"><div class="section-head"><h2>Personal Watchlist</h2></div><div class="watchlist"><div class="wl-row down" data-sym="BHP.AX"><span class="wl-name">BHP Group</span><span class="wl-price">65.16</span><span class="wl-chg">▼ -0.59</span><span class="wl-pct">-0.90%</span></div><div class="wl-row up" data-sym="RIO.AX"><span class="wl-name">Rio Tinto</span><span class="wl-price">175.38</span><span class="wl-chg">▲ +2.34</span><span class="wl-pct">+1.35%</span></div><div class="wl-row down" data-sym="FMG.AX"><span class="wl-name">Fortescue<span class="sens" title="FY26 Full Year Results Presentation">&#42;</span></span><span class="wl-price">17.750</span><span class="wl-chg">▼ -0.200</span><span class="wl-pct">-1.11%</span></div><div class="wl-row up" data-sym="MIN.AX"><span class="wl-name">Mineral Resources</span><span class="wl-price">66.29</span><span class="wl-chg">▲ +0.77</span><span class="wl-pct">+1.18%</span></div><div class="wl-row up" data-sym="PLS.AX"><span class="wl-name">Pilbara Minerals</span><span class="wl-price">5.070</span><span class="wl-chg">▲ +0.240</span><span class="wl-pct">+4.97%</span></div><div class="wl-row down" data-sym="LYC.AX"><span class="wl-name">Lynas Rare Earths</span><span class="wl-price">16.210</span><span class="wl-chg">▼ -0.010</span><span class="wl-pct">-0.06%</span></div><div class="wl-row up" data-sym="NST.AX"><span class="wl-name">Northern Star<span class="sens" title="FY26 Financial Results Presentation">&#42;</span></span><span class="wl-price">23.97</span><span class="wl-chg">▲ +0.03</span><span class="wl-pct">+0.13%</span></div><div class="wl-row down" data-sym="SHN.AX"><span class="wl-name">Sunshine Metals</span><span class="wl-price">0.0390</span><span class="wl-chg">▼ -0.0010</span><span class="wl-pct">-2.50%</span></div><div class="wl-row up" data-sym="TSO.AX"><span class="wl-name">Tesoro Gold<span class="sens" title="Ternera Infill Returns Wide, High-Grade Gold Intercepts">&#42;</span></span><span class="wl-price">1.0600</span><span class="wl-chg">▲ +0.0300</span><span class="wl-pct">+2.91%</span></div><div class="wl-row up"><span class="wl-name">Antipa Minerals</span><span class="wl-price">0.6500</span><span class="wl-chg">▲ +0.0050</span><span class="wl-pct">+0.78%</span></div><div class="wl-row up" data-sym="WDS.AX"><span class="wl-name">Woodside Energy</span><span class="wl-price">33.78</span><span class="wl-chg">▲ +0.17</span><span class="wl-pct">+0.51%</span></div><div class="wl-row down" data-sym="STO.AX"><span class="wl-name">Santos</span><span class="wl-price">8.410</span><span class="wl-chg">▼ -0.040</span><span class="wl-pct">-0.47%</span></div><div class="wl-row up" data-sym="CBA.AX"><span class="wl-name">Commonwealth Bank</span><span class="wl-price">157.99</span><span class="wl-chg">▲ +1.55</span><span class="wl-pct">+0.99%</span></div><div class="wl-row down" data-sym="MQG.AX"><span class="wl-name">Macquarie Group</span><span class="wl-price">248.43</span><span class="wl-chg">▼ -3.87</span><span class="wl-pct">-1.53%</span></div><div class="wl-row down" data-sym="CSL.AX"><span class="wl-name">CSL Ltd</span><span class="wl-price">168.30</span><span class="wl-chg">▼ -2.90</span><span class="wl-pct">-1.69%</span></div><div class="wl-row down" data-sym="NVDA"><span class="wl-name">NVIDIA</span><span class="wl-price">215.39</span><span class="wl-chg">▼ -1.46</span><span class="wl-pct">-0.67%</span></div><div class="wl-row up" data-sym="MSFT"><span class="wl-name">Microsoft</span><span class="wl-price">483.03</span><span class="wl-chg">▲ +1.88</span><span class="wl-pct">+0.39%</span></div><div class="wl-row down" data-sym="AAPL"><span class="wl-name">Apple</span><span class="wl-price">308.73</span><span class="wl-chg">▼ -2.57</span><span class="wl-pct">-0.83%</span></div><div class="wl-row up" data-sym="TSLA"><span class="wl-name">Tesla</span><span class="wl-price">364.59</span><span class="wl-chg">▲ +19.46</span><span class="wl-pct">+5.64%</span></div></div></section></main>
+  <footer class="foot">
+    <div class="foot-nav"><a href="#section-local">Local</a><a href="#section-markets">Markets</a><a href="#section-mining">Mining</a><a href="#section-pick">Pick</a><a href="#section-themes">Overnight</a><a href="#section-watch">Watch</a><a href="#section-economy">Economy</a><a href="#section-highlights">Highlights</a><a href="#section-news">News</a><a href="#section-watchlist">Watchlist</a></div>
+    <p>Built Sat 22 Aug, 5:00am AEST. Market prices refresh live in your browser; news, themes and the economy figures are this morning's snapshot.</p>
+    <p class="foot-fine">Markets via CNBC &amp; Yahoo Finance · ASX data via ASX/Markit · News via public RSS feeds · Informational only, not financial advice.</p>
+  </footer>
+</div>
+<script>
+(function(){
+  // --- Live market-status pills (recomputed from the viewer's AEST clock) ---
+  // The page is a static morning snapshot, so the baked-in status goes stale
+  // during the day. Recompute it locally — no network, still fully static.
+  function updateStatus(){
+    var el = document.getElementById('market-status');
+    if (!el) return;
+    var syd;
+    try { syd = new Date(new Date().toLocaleString('en-US', {timeZone:'Australia/Sydney'})); }
+    catch(e){ return; }                       // leave the server fallback in place
+    var wd = syd.getDay();                     // 0=Sun .. 6=Sat
+    var h = syd.getHours() + syd.getMinutes()/60;
+    var asxOpen = wd >= 1 && wd <= 5 && h >= 10 && h < 16;            // 10:00–16:00 Syd, Mon–Fri
+    var usLive  = !(wd === 6 || wd === 0 || (wd === 1 && h < 8));      // CME equity futures ~Mon 8am–Sat Syd
+    var pills = [
+      [usLive ? 'US futures live' : 'US futures closed', usLive ? 'live' : 'closed'],
+      [asxOpen ? 'ASX open' : 'ASX closed', asxOpen ? 'live' : 'closed']
+    ];
+    el.innerHTML = pills.map(function(p){
+      return '<span class="pill ' + p[1] + '"><span class="dot"></span>' + p[0] + '</span>';
+    }).join('');
+  }
+  updateStatus();
+  setInterval(updateStatus, 60000);            // keep it correct if the page stays open
+
+  // Time-aware greeting from the viewer's AEST clock (page is built pre-dawn).
+  function updateGreeting(){
+    var el = document.getElementById('greet-part'); if(!el) return;
+    var syd; try { syd = new Date(new Date().toLocaleString('en-US',{timeZone:'Australia/Sydney'})); } catch(e){ return; }
+    var h = syd.getHours();
+    el.textContent = h < 12 ? 'morning' : (h < 18 ? 'afternoon' : 'evening');
+  }
+  updateGreeting(); setInterval(updateGreeting, 60000);
+
+  // Live local weather (Open-Meteo, CORS) — keeps the Port Stephens brief current.
+  var WMO={0:['Clear','☀️'],1:['Mainly clear','🌤️'],2:['Partly cloudy','⛅'],3:['Overcast','☁️'],
+    45:['Fog','🌫️'],48:['Rime fog','🌫️'],51:['Light drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy drizzle','🌧️'],
+    61:['Light rain','🌦️'],63:['Rain','🌧️'],65:['Heavy rain','🌧️'],71:['Light snow','🌨️'],73:['Snow','🌨️'],
+    75:['Heavy snow','❄️'],80:['Light showers','🌦️'],81:['Showers','🌧️'],82:['Heavy showers','⛈️'],
+    95:['Thunderstorm','⛈️'],96:['Storm + hail','⛈️'],99:['Storm + hail','⛈️']};
+  function setTxt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  function updateWeather(){
+    var wx=document.getElementById('wx'); if(!wx||!window.fetch) return;
+    var lat=wx.getAttribute('data-lat'), lon=wx.getAttribute('data-lon'); if(!lat||!lon) return;
+    var u='https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lon+
+      '&current=temperature_2m,weather_code,wind_speed_10m,relative_humidity_2m,precipitation'+
+      '&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Australia%2FSydney&forecast_days=1';
+    fetch(u).then(function(r){return r.ok?r.json():null;}).then(function(d){
+      if(!d||!d.current) return; var c=d.current, w=WMO[c.weather_code]||['—','🌡️'], dl=d.daily||{};
+      setTxt('wx-emoji',w[1]); setTxt('wx-temp',Math.round(c.temperature_2m)+'°'); setTxt('wx-text',w[0]);
+      var hi=dl.temperature_2m_max&&dl.temperature_2m_max[0]!=null?'High '+Math.round(dl.temperature_2m_max[0])+'° · ':'';
+      var lo=dl.temperature_2m_min&&dl.temperature_2m_min[0]!=null?'Low '+Math.round(dl.temperature_2m_min[0])+'° · ':'';
+      var rain=dl.precipitation_probability_max&&dl.precipitation_probability_max[0]!=null?dl.precipitation_probability_max[0]:'—';
+      setTxt('wx-meta', hi+lo+'Wind '+Math.round(c.wind_speed_10m)+' km/h · Hum '+Math.round(c.relative_humidity_2m)+'% · Rain '+rain+'%');
+    }).catch(function(){});
+  }
+  updateWeather(); setInterval(updateWeather, 600000);
+
+  // Days-to-HSC countdown (recompute from the viewer's clock).
+  function updateHsc(){
+    var el=document.getElementById('hsc-days'); var box=el&&el.closest('[data-hsc]'); if(!box) return;
+    var exam=new Date(box.getAttribute('data-hsc')); var days=Math.floor((exam-new Date())/86400000);
+    el.textContent = days<0?'Done':(days===0?'Today':(days===1?'Tomorrow':days+' days'));
+  }
+  updateHsc(); setInterval(updateHsc, 3600000);
+
+  // Installable PWA: cache the shell so it opens offline.
+  if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
+
+  var btn = document.getElementById('theme-btn');
+  function effective(){
+    var set = document.documentElement.getAttribute('data-theme');
+    if (set) return set;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  }
+  function paint(){
+    var e = effective();
+    btn.querySelector('.t-icon').textContent = e === 'dark' ? '☀' : '☾';
+    btn.querySelector('.t-label').textContent = e === 'dark' ? 'Light' : 'Dark';
+  }
+  btn.addEventListener('click', function(){
+    var next = effective() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('mcd-theme', next); } catch(e){}
+    paint();
+  });
+  // Keep the button in sync if the OS theme flips while no manual choice is set.
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', function(){
+      if (!document.documentElement.getAttribute('data-theme')) paint();
+    });
+  }
+  paint();
+
+  // --- Live prices (progressive enhancement) -------------------------------
+  // The page ships with cached values so it loads instantly, then refreshes
+  // from CNBC's CORS-enabled quote API every minute. When a market is shut,
+  // CNBC's "last" is that market's previous close — so you always see the most
+  // recent real result, live whenever you open the page.
+  var CNBC = 'https://quote.cnbc.com/quote-html-webservice/restQuote/symbolType/symbol?requestMethod=itv&fund=1&exthrs=1&output=json&symbols=';
+  function dec(v){ v = Math.abs(v); return v < 2 ? 4 : (v < 20 ? 3 : 2); }
+  function fnum(v, ref){ var d = dec(ref==null?v:ref); return v.toLocaleString('en-AU',{minimumFractionDigits:d, maximumFractionDigits:d}); }
+  function fchg(v, ref){ return (v>=0?'+':'') + fnum(v, ref); }
+  function fpct(v){ return (v>=0?'+':'') + v.toFixed(2) + '%'; }
+  function parseNum(s){ if(s==null) return null; var n=parseFloat(String(s).replace(/[,%]/g,'')); return isNaN(n)?null:n; }
+
+  function flash(el, dir){
+    var c = dir==='up'?'flash-up':(dir==='down'?'flash-down':null);
+    if(!c) return; el.classList.add(c); setTimeout(function(){ el.classList.remove(c); }, 800);
+  }
+  function applyRow(el, last, chg, hi, lo){
+    if(last==null) return;
+    if(chg==null) chg = 0;                       // CNBC "UNCH"
+    var prev = last - chg, pct = prev? chg/prev*100 : 0;
+    var dir = chg>0?'up':(chg<0?'down':'flat'), arrow = dir==='up'?'▲':(dir==='down'?'▼':'•');
+    var wl = el.classList.contains('wl-row');
+    el.classList.remove('up','down','flat','is-stale'); el.classList.add(dir);
+    el.setAttribute('data-pct', pct.toFixed(4));
+    var pe = el.querySelector(wl?'.wl-price':'.q-price');
+    if(pe){ var old=pe.textContent; var nv=fnum(last,last); if(old!==nv){ pe.textContent=nv; flash(el,dir);} }
+    if(wl){
+      var c=el.querySelector('.wl-chg'); if(c) c.textContent=arrow+' '+fchg(chg,last);
+      var p=el.querySelector('.wl-pct'); if(p) p.textContent=fpct(pct);
+    } else {
+      var c2=el.querySelector('.q-chg'); if(c2) c2.innerHTML=arrow+' '+fchg(chg,last)+' <span class="q-pct">'+fpct(pct)+'</span>';
+      if(hi!=null && lo!=null && hi>lo){
+        var dot=el.querySelector('.range-dot'), rg=el.querySelector('.range');
+        if(dot) dot.style.left=Math.max(0,Math.min(100,(last-lo)/(hi-lo)*100)).toFixed(1)+'%';
+        if(rg){ rg.classList.remove('up','down','flat','range--none'); rg.classList.add(dir); }
+      }
+      var as=el.querySelector('.q-asof'); if(as) as.remove();
+      var dl=el.getAttribute('data-danger');   // bond danger: re-evaluate live
+      if(dl!=null){ var lvl=parseFloat(dl); if(!isNaN(lvl)) el.classList.toggle('danger', last>=lvl); }
+    }
+  }
+  function refresh(){
+    var up=0, down=0, movers=[];
+    document.querySelectorAll('.market-grid .row').forEach(function(r){
+      var pct=parseFloat(r.getAttribute('data-pct')); if(isNaN(pct)) return;
+      if(r.classList.contains('up')) up++; else if(r.classList.contains('down')) down++;
+      var lab=r.querySelector('.q-label'); lab = lab? (lab.childNodes[0]?lab.childNodes[0].textContent:lab.textContent).trim():'';
+      movers.push({label:lab, pct:pct, dir:r.classList.contains('up')?'up':(r.classList.contains('down')?'down':'flat')});
+    });
+    var b=document.getElementById('breadth'); if(b) b.innerHTML='<span class="up">'+up+'\u2191</span> <span class="down">'+down+'\u2193</span>';
+    movers.sort(function(a,b){return Math.abs(b.pct)-Math.abs(a.pct);});
+    var top=movers.filter(function(m){return Math.abs(m.pct)>=0.05;}).slice(0,6);
+    var mv=document.getElementById('movers');
+    if(mv && top.length){
+      mv.innerHTML='<div class="movers"><span class="movers-label">Big movers</span>'+top.map(function(m){
+        var a=m.dir==='up'?'▲':(m.dir==='down'?'▼':'•');
+        return '<span class="mover '+m.dir+'"><span class="mover-name">'+m.label+'</span><span class="mover-pct">'+a+' '+fpct(m.pct)+'</span></span>';
+      }).join('')+'</div>';
+    }
+  }
+  function chunks(arr,n){ var o=[]; for(var i=0;i<arr.length;i+=n) o.push(arr.slice(i,i+n)); return o; }
+  function updateQuotes(){
+    var els=[].slice.call(document.querySelectorAll('[data-sym]'));
+    if(!els.length || !window.fetch) return;
+    var symMap={}; els.forEach(function(e){ (symMap[e.getAttribute('data-sym')]=symMap[e.getAttribute('data-sym')]||[]).push(e); });
+    var syms=Object.keys(symMap);
+    Promise.all(chunks(syms,40).map(function(ch){
+      return fetch(CNBC+ch.join('%7C')).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});
+    })).then(function(results){
+      var got=0;
+      results.forEach(function(d){
+        var list=d&&d.FormattedQuoteResult&&d.FormattedQuoteResult.FormattedQuote;
+        if(!list) return;
+        list.forEach(function(q){
+          if(String(q.code)!=='0') return;
+          var els=symMap[q.symbol]; if(!els) return; got++;
+          els.forEach(function(el){ applyRow(el, parseNum(q.last), parseNum(q.change), parseNum(q.high), parseNum(q.low)); });
+        });
+      });
+      if(got){ refresh(); updateGoldAud(); var ind=document.getElementById('live-ind');
+        if(ind){ ind.hidden=false; var t=new Date().toLocaleTimeString('en-AU',{hour:'2-digit',minute:'2-digit'}); ind.querySelector('.live-text').textContent='live · '+t; } }
+    });
+  }
+  function updateGoldAud(){
+    var g=document.querySelector('[data-sym="@GC.1"] .q-price'), a=document.querySelector('[data-sym="AUD="] .q-price');
+    var el=document.getElementById('gold-aud'); if(!g||!a||!el) return;
+    var gv=parseNum(g.textContent), av=parseNum(a.textContent); if(!gv||!av) return;
+    var s=el.querySelector('strong'); if(s) s.textContent='A$'+(gv/av).toLocaleString('en-AU',{maximumFractionDigits:0});
+  }
+  updateQuotes();
+  setInterval(updateQuotes, 60000);
+})();
+</script>
+</body>
+</html>
